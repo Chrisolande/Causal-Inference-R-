@@ -1,0 +1,16 @@
+[format]
+line-width = 80
+indent-width = 2
+indent-style = "space"
+line-ending = "auto"
+persistent-line-breaks = true
+default-exclude = true
+skip = []
+table = []
+default-table = true
+exclude = [
+  "renv/**",
+  "_freeze/**",
+  "docs/**",
+  ".Rproj.user/**",
+]

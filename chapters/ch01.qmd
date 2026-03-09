@@ -1,0 +1,108 @@
+# From casual to causal
+
+## Overview
+
+Data science primarily involves three fundamental tasks: description, prediction, and causal inference. Researchers frequently conflate these tasks, utilizing ambiguous terminology that masks causal intent while avoiding the rigorous assumptions required for true causal analysis. Clearly defining the specific goal of an inquiry is a prerequisite for selecting the correct methodology, as models optimized for prediction or description generally fail to produce valid causal inferences.
+
+## Core Concepts
+
+```{r}
+#| label: core-concepts
+#| echo: false
+librarian::shelf(tidyverse, knitr, kableExtra)
+
+tibble(
+  Term = c(
+    "Casual Inference", "Schrodinger's Causal Inference", "Descriptive Analysis",
+    "Prediction", "Causal Inference", "Exposure", "Outcome",
+    "Eligibility Criteria", "Target Population", "Time Zero",
+    "Follow Up Period", "Table Two Fallacy"
+  ),
+  Explanation = c(
+    "Making conclusions without explicitly defining causal questions or addressing the assumptions necessary to answer them.",
+    "A pervasive phenomenon where researchers avoid stating an interest in estimating causal effects but embed causal intent, language, and recommendations throughout their studies.",
+    "The statistical summarization of variable distributions, often stratified by key characteristics to describe populations.",
+    "The use of data to calculate accurate estimates of variables on new, unobserved data.",
+    "The process of determining the specific impact that one variable has on another.",
+    "The variable hypothesized to act as the cause.",
+    "The variable hypothesized to act as the effect.",
+    "The specific conditions defining the subjects for whom the causal claim applies.",
+    "The larger population for whom the outcome effect is estimated.",
+    "The point in time when participant follow-up begins in a study.",
+    "The specific duration over which the outcome is observed and measured.",
+    "The erroneous practice of presenting confounders alongside exposure variables in regression tables and interpreting their coefficients as independent causal effects."
+  )
+) %>%
+  kable(col.names = c("Term", "Explanation")) %>%
+  kable_styling(full_width = TRUE, bootstrap_options = c("hover", "condensed")) %>%
+  column_spec(1, bold = TRUE, width = "20%") %>%
+  column_spec(2, width = "80%")
+```
+
+## Methods/Estimators
+```{r}
+#| label: methods
+#| echo: false
+tibble(
+  `Method` = c("Description", "Prediction", "Causal Inference"),
+  Objective = c(
+    "Detail variable distributions by person, place, and time",
+    "Maximize estimation accuracy on novel data",
+    "Calculate an unbiased effect of an exposure on an outcome"
+  ),
+  `Typical Workflow` = c(
+    "EDA; measures of spread and central tendency",
+    "Train/test splits; managing the bias-variance trade-off",
+    "Randomized trials or statistical adjustment for confounders"
+  ),
+  `Validity Metric` = c(
+    "Minimization of measurement and sampling errors",
+    "RMSE, MAE, AUC",
+    "Dependent on untestable structural assumptions"
+  ),
+  `Confounding` = c(
+    "Undefined — descriptions capture data as-is",
+    "Undefined — confounded variables used if predictive",
+    "Central focus; must be isolated to identify the true effect"
+  )
+) %>%
+  kable() %>%
+  kable_styling(full_width = TRUE, bootstrap_options = c("hover", "condensed")) %>%
+  column_spec(1, bold = TRUE, width = "15%")
+```
+
+## Assumptions
+
+```{r}
+#| label: assumptions
+#| echo: false
+tibble(
+  Category = c(
+    "Descriptive Validity", "Predictive Validity",
+    "Causal Validity", "Variable Selection"
+  ),
+  `Key Assumptions` = c(
+    "Sampled data properly represents the target population; minimal measurement error.",
+    "Hold-out performance proxies generalization to future data; missingness and measurement errors can be leveraged as informative features.",
+    "The underlying structural model is correct. Most causal assumptions are fundamentally unverifiable.",
+    "Variables are selected from domain background knowledge, not from predictive feature selection metrics or associational statistics."
+  )
+) %>%
+  kable() %>%
+  kable_styling(full_width = TRUE, bootstrap_options = c("hover", "condensed")) %>%
+  column_spec(1, bold = TRUE, width = "22%")
+```
+
+## Key Takeaways
+
+- Analytical tasks must be strictly categorized into description, prediction or causal inference to ensure appropriate methodological choices.
+
+- The ability of a model tto accurately predict an outcome does not indicate the the model's coefficients represent valid causal effects.
+
+- Highly predictive models often optimize accuracy by exploiting proxy variables correlated with unmeasured confounders, rendering their internal weights causally biased.
+
+- Introducing intentional bias (eg penalized regression) often improves variance in prediction models but undermines the primary goal of causal inference.
+
+- Confounding is exclusively causal concept and does not exist within purely descriptive of predictive frameworks.
+
+- Valid causal analysis begins by clearly diagramming the claim to map the exposure, outcome, target population, eligibility criteria, time zero and follow-up period.
