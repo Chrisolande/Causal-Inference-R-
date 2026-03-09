@@ -1,0 +1,143 @@
+# The whole game: mosquito nets and malaria
+
+## Overview
+
+An in depth causal analysis follows six step framework. specifying a crucial question, drawing assumptions via causal diagrams, modeling those assumptions, diagnosing the models, estimating the causal effect, and conducting the sensitivity analysis. Applied to simulated observational data, this methodology demonstrates how to estimate the causal impact of bed net usage on malaria risk by utilizing propensity score weighting to adjust for confounding variables.
+
+## Core Concepts
+
+```{r}
+#| label: core-concepts
+#| echo: false
+
+librarian::shelf(tidyverse, knitr, kableExtra)
+
+tibble(
+  Term = c("Target Trial", "Causal Directed Acyclic Graph (DAGs)", "Minimal Adjustment Set", "Propensity Score", "Inverse Probability Weighting (IPW)", "Average Treatement Effect (ATE)", "Standardized Mean Difference (SMD)", "Tipping Point Analysis"),
+  Definition = c(
+      "The hypothetical randomized trial one would conduct to answer a causal question, serving a framework to clarify the parameters of an observational study.",
+      "Visual diagrams that explicitly state assumed causal relationships between variables to identify open confounding pathways.",
+      "The minimum combination of variables required to successfully block all confounding pathways within a specified causal diagram",
+      "The predicted probability of recieving a treatment or exposure, modeled using the minimal adjustment set of observed confounders",
+      "An adjustment technique that applies weights derived from propensity scores to create a pseudo-population where confounder distributions are balanced between exposure groups.",
+      "A causal estimand representing the difference in expected outcomes if the entire population received the treatment ersus if the entire population did not receive the treatment",
+      "A standardized metric used to evaluate the balance of a confounder across exposure groupes with values under 0.1 generally indicating an acceptable balance.",
+      "A form of sensitivity analysis calculating the specific strength required of an unmeasured confounder to shift a calculated causal effect estimate to the null"
+  )
+) %>%
+    kable(col.names = c("Term", "Definition")) %>%
+    kable_styling(full_width = TRUE, bootstrap_options = c("hover", "condensed")) %>%
+    column_spec(1, bold = TRUE, width = "25%") %>%
+    column_spec(2, width = "75%")
+```
+
+## Methods / Estimators
+
+```{r}
+#| label: Methods-estimators
+#| echo: false
+
+tibble(
+    mtd = c("Naive Linear Regression", "Logistic Regression", "IPW Calculation", "Bootstrapping", "Sensitivity Analysis"),
+    objective = c("Estimates the simple associations without causal adjustment",
+                 "Models treatment assignment for propensity scores",
+                 "Balances confounders across exposure groups",
+                 "Computes valid confidence intervals for weighted estimators",
+                 "Tests the robustness of the effect estimate against unmeasured confounding"),
+    implementation = c("Captures the true causal pathway alongside all open confounding pathways yielding biased effect estimates",
+                      "Predicts the exposure variable using only the variables identified in the minimal adjustment set",
+                      "The ATE weight is calculated as the inverse of the probability receiving the specific treatment the individual actually received",
+                      "Re samples the data and recalculates both the propensity scores and the outcome model for every iteration to account for the weight estimation uncertainty",
+                      "Adjusts the final estimate based on assumed distributions and effects of unmeasured variables")
+) %>%
+kable(col.names = c("Method", "Objective", "Implementation Detail")) %>%
+kable_styling(full_width = TRUE, bootstrap_options = c("hover", "condensed")) %>%
+column_spec(1, width = "18%", bold = TRUE) %>%
+column_spec(2, width = "20%")
+
+```
+
+## Workflow Implementation
+
+### Step 1: Naive Exploration
+
+```{r}
+#| include: true
+#| label: naive-exploration
+
+librarian::shelf(tidyvese, causalworkshop, tidymodels, paletteer)
+
+net_data %>%
+  ggplot(aes(malaria_risk, fill = net)) +
+  geom_density(color = NA, alpha = 0.85, linewidth = 0) +
+  scale_fill_paletteer_d("nationalparkcolors::Acadia")
+
+net_data %>%
+    group_by(net) %>%
+    summarise(malaria_risk = mean(malaria_risk))
+
+net_data  %>% 
+    lm(malaria_risk ~ net, data = .) %>%
+    tidy()
+
+```
+
+### Step 2 & 3: Modeling Assumptions (Propensity Scores & IPW)
+```{r}
+#| label: steps2-3
+#| echo: true
+#| code-fold: true
+
+librarian::shelf(tidymodels, propensity)
+
+net_data_f <- net_data  %>% 
+  mutate(net = as.factor(net))
+
+propensity_model <- logistic_reg()  %>% 
+  set_engine("glm") %>% 
+  fit(net ~ income + health + temperature, data = net_data_f)
+
+head(predict(propensity_model, net_data_f, type = "prob"))
+
+net_data_wts <- net_data_f  %>% 
+  bind_cols(
+    propensity_model  %>% 
+      predict(net_data_f, type = "prob")  %>% 
+      rename(.fitted = .pred_TRUE)
+  ) %>% 
+  mutate(wts = wt_ate(.fitted, net))
+
+net_data_wts  %>% 
+  select(net, .fitted, wts)  %>% 
+  head()
+```
+
+## Step 4: Diagnosing Models(Assessing Balance)
+
+```{r}
+#| label: step4
+#| echo: true
+#| code-fold: true
+
+library(halfmoon)
+ggplot(net_data_wts, aes(.fitted, fill = net)) +
+  geom_mirror_histogram(aes(group = net), bins = 50) +
+  scale_fill_paletteer_d("nationalparkcolors::Acadia") +
+  scale_y_continuous(labels = abs) +
+  theme_minimal(base_family = "Source Sans 3") +
+  theme(
+    legend.position = "top",
+    legend.title    = element_blank(),
+    legend.text     = element_text(color = "#7a6a58", family = "Source Sans 3"),
+    legend.background = element_blank(),
+    legend.key      = element_blank()
+  ) +
+  scale_fill_paletteer_d(
+    "nationalparkcolors::Acadia",
+    labels = c("No net", "Net used")
+  ) +
+  labs(
+    x = "Propensity Score", y = "Count",
+    title = "Propensity Score Distribution: Checking Common Support"
+  )
+```
