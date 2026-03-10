@@ -50,3 +50,5 @@ rsconnect/
 .github/instructions/codacy.instructions.md
 
 /.quarto/
+
+chapters/*.r
