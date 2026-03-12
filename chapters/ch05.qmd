@@ -1,0 +1,355 @@
+---
+title: "Chapter 5: Causal Inference Is Not (Just) a Statistical Problem"
+subtitle: "Summary of *Causal Inference in R*, Chapter 5"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    theme: cosmo
+execute:
+  warning: false
+  message: false
+---
+
+## Overview
+
+Statistics cannot carry the full weight of causal inference on its own. This chapter makes that case through three related ideas: the Causal Quartet, time-ordering as a structural heuristic, and the limits of predictive metrics. Each one reveals a different way that data alone misleads you into the wrong answer.
+
+## 5.1 The Causal Quartet
+
+The chapter opens by extending a well-worn lesson. Anscombe's Quartet showed in 1973 that identical summary statistics can hide wildly different data shapes. The Datasaurus Dozen drove the same point home visually. Causal inference goes further: even when two datasets look the same and have the same correlations, their causal structures can be completely different, and the right model depends on which structure you are working with.
+
+```{r}
+#| label: fig-anscombe
+#| fig-cap: "Anscombe's Quartet. Summary statistics match across all four panels; the shapes do not."
+
+library(quartets)
+library(tidyverse)
+library(ggdag)
+
+anscombe_quartet |>
+  ggplot(aes(x, y)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
+  facet_wrap(~dataset) +
+  theme_minimal()
+```
+
+```{r}
+#| label: fig-datasaurus
+#| fig-cap: "The Datasaurus Dozen. All 13 datasets share nearly identical means, standard deviations, and correlations."
+
+library(datasauRus)
+
+datasaurus_dozen |>
+  summarise(cor = round(cor(x, y), 2), .by = dataset)
+
+datasaurus_dozen |>
+  ggplot(aes(x, y)) +
+  geom_point(size = 0.6) +
+  facet_wrap(~dataset) +
+  theme_minimal()
+```
+
+The Causal Quartet pushes this further. Four datasets have the same statistics and the same visualizations, but their underlying causal structures are different. The only thing that changes is the role of a third variable, `covariate`. Is it a confounder, a mediator, or a collider? Data cannot answer that question.
+
+```{r}
+#| label: fig-causal-quartet-hidden
+#| fig-cap: "The Causal Quartet with dataset labels hidden. All four panels are visually identical."
+
+causal_quartet |>
+  mutate(dataset = as.integer(factor(dataset))) |>
+  mutate(
+    exposure = scale(exposure),
+    outcome = scale(outcome),
+    .by = dataset
+  ) |>
+  ggplot(aes(exposure, outcome)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
+  facet_wrap(~dataset) +
+  theme_minimal()
+```
+
+When you fit models with and without `covariate`, the unadjusted estimate is 1.00 across all four datasets, and the correlation between `exposure` and `covariate` is 0.70 across all four as well. But the adjusted estimates differ, and the correct one depends entirely on background knowledge about the causal structure.
+
+```{r}
+#| label: tbl-quartet-lm
+#| tbl-cap: "Estimated effect of `exposure` on `outcome` in the Causal Quartet, with and without adjustment."
+
+library(gt)
+
+causal_quartet |>
+  nest_by(dataset = as.integer(factor(dataset))) |>
+  mutate(
+    ate_x = coef(lm(outcome ~ exposure, data = data))[[2]],
+    ate_xz = coef(lm(outcome ~ exposure + covariate, data = data))[[2]],
+    cor = cor(data$exposure, data$covariate)
+  ) |>
+  select(-data) |>
+  ungroup() |>
+  gt() |>
+  fmt_number(columns = -dataset) |>
+  cols_label(
+    dataset = "Dataset",
+    ate_x = md("Not adjusting for `covariate`"),
+    ate_xz = md("Adjusting for `covariate`"),
+    cor = md("Correlation of `exposure` and `covariate`")
+  )
+```
+
+::: {.callout-warning}
+## The Ten Percent Rule Does Not Work
+
+A common epidemiological heuristic says to include a variable if it changes the effect estimate by more than 10%. Every example in the Causal Quartet clears that threshold, so the rule would tell you to adjust in all four cases. That is wrong for at least two of them.
+:::
+
+```{r}
+#| label: tbl-percent-change
+#| tbl-cap: "Percent change in the exposure coefficient when covariate is added."
+
+causal_quartet |>
+  nest_by(dataset = as.integer(factor(dataset))) |>
+  mutate(
+    ate_x = coef(lm(outcome ~ exposure, data = data))[[2]],
+    ate_xz = coef(lm(outcome ~ exposure + covariate, data = data))[[2]],
+    percent_change = scales::percent((ate_x - ate_xz) / ate_x)
+  ) |>
+  select(dataset, percent_change) |>
+  ungroup() |>
+  gt() |>
+  cols_label(dataset = "Dataset", percent_change = "Percent change")
+```
+
+The only path forward is a DAG. Once you know which structure you are in, you just ask the DAG for the correct adjustment set.
+
+```{r}
+#| label: fig-quartet-dags
+#| fig-cap: "DAGs for the Causal Quartet. The covariate's role is different in each."
+#| layout-ncol: 2
+
+make_dag_plot <- function(dag_obj, title_text) {
+  dag_obj |>
+    tidy_dagitty() |>
+    mutate(covariate = if_else(label == "c", "covariate", NA_character_)) |>
+    ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_dag_point(aes(color = covariate)) +
+    geom_dag_edges(edge_color = "grey70") +
+    geom_dag_text(aes(label = label)) +
+    theme_dag() +
+    coord_cartesian(clip = "off") +
+    theme(legend.position = "bottom") +
+    ggtitle(title_text) +
+    guides(color = guide_legend(
+      title = NULL,
+      keywidth = unit(1.4, "mm"),
+      override.aes = list(size = 3.4, shape = 15)
+    )) +
+    scale_color_discrete(breaks = "covariate", na.value = "grey70")
+}
+
+make_dag_plot(quartet_collider(x = "e", y = "o", z = "c"), "(1) Collider")
+make_dag_plot(quartet_confounder(x = "e", y = "o", z = "c"), "(2) Confounder")
+make_dag_plot(quartet_mediator(x = "e", y = "o", z = "c"), "(3) Mediator")
+quartet_m_bias(x = "e", y = "o", z = "c", u1 = "u1", u2 = "u2") |>
+  tidy_dagitty() |>
+  mutate(covariate = if_else(label == "c", "covariate", NA_character_)) |>
+  ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_dag_point(aes(color = covariate)) +
+  geom_dag_edges(edge_color = "grey70") +
+  geom_dag_text(aes(label = label)) +
+  theme_dag() +
+  coord_cartesian(clip = "off") +
+  theme(legend.position = "bottom") +
+  ggtitle("(4) M-Bias") +
+  guides(color = guide_legend(
+    title = NULL,
+    keywidth = unit(1.4, "mm"),
+    override.aes = list(size = 3.4, shape = 15)
+  )) +
+  scale_color_discrete(breaks = "covariate", na.value = "grey70")
+```
+
+| Data generating mechanism | Correct model | Correct effect |
+|---|---|---|
+| (1) Collider | `outcome ~ exposure` | 1 |
+| (2) Confounder | `outcome ~ exposure + covariate` | 0.5 |
+| (3) Mediator | Direct: `outcome ~ exposure + covariate`; Total: `outcome ~ exposure` | 0 / 1 |
+| (4) M-Bias | `outcome ~ exposure` | 1 |
+
+: Correct models and causal effects for each dataset in the Causal Quartet. {#tbl-quartet-truth}
+
+## 5.2 Time as a Heuristic for Causal Structure
+
+Building a correct DAG from scratch is hard. When background knowledge is thin, time-ordering gives you a cheap but useful defensive strategy: a cause must come before its effect, so a variable measured before the outcome cannot be a descendant of it. Controlling for baseline covariates protects you from one common source of collider bias.
+
+```{r}
+#| label: fig-time-ordered
+#| fig-cap: "A time-ordered collider DAG. Adjusting for the covariate at follow-up opens a collider path; adjusting for the same covariate at baseline does not."
+#| layout-ncol: 2
+
+d_coll_time <- quartet_time_collider(
+  x0 = "e0", x1 = "e1", x2 = "e2", x3 = "e3",
+  y1 = "o1", y2 = "o2", y3 = "o3",
+  z1 = "c1", z2 = "c2", z3 = "c3"
+)
+
+plot_time_dag <- function(dag, highlight_node, legend_label) {
+  dag |>
+    tidy_dagitty() |>
+    mutate(covariate = if_else(label == highlight_node, legend_label, NA_character_)) |>
+    ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
+    geom_dag_point(aes(color = covariate)) +
+    geom_dag_edges(edge_color = "grey70") +
+    geom_dag_text(aes(label = label)) +
+    theme_dag() +
+    coord_cartesian(clip = "off") +
+    theme(legend.position = "bottom") +
+    geom_vline(xintercept = c(2.6, 3.25, 3.6, 4.25), lty = 2, color = "grey60") +
+    annotate("label", x = 2.925, y = 0.97, label = "baseline", color = "grey50") +
+    annotate("label", x = 3.925, y = 0.97, label = "follow-up", color = "grey50") +
+    guides(color = guide_legend(
+      title = NULL,
+      keywidth = unit(1.4, "mm"),
+      override.aes = list(size = 3.4, shape = 15)
+    )) +
+    scale_color_discrete(breaks = legend_label, na.value = "grey70")
+}
+
+plot_time_dag(d_coll_time, "c3", "covariate\n(follow-up)")
+plot_time_dag(d_coll_time, "c2", "covariate\n(baseline)")
+```
+
+The simple rule is: do not adjust for the future. Applying `outcome_followup ~ exposure_baseline + covariate_baseline` gets the right answer for three of four datasets. The one failure is the M-bias case, where the collider occurs before the exposure and outcome, so baseline measurement still opens the path. The practical guidance: if you suspect M-bias but are not certain, adjusting is still safer than not, because confounding bias tends to be worse and genuine M-bias is rare.
+
+```{r}
+#| label: tbl-time-adjusted
+#| tbl-cap: "Effects recovered by adjusting for baseline covariate only."
+
+causal_quartet_time |>
+  nest_by(dataset) |>
+  mutate(
+    adjusted_effect = coef(
+      lm(outcome_followup ~ exposure_baseline + covariate_baseline, data = data)
+    )[[2]]
+  ) |>
+  bind_cols(tibble(truth = c(1, 0.5, 1, 1))) |>
+  select(-data) |>
+  ungroup() |>
+  set_names(c("Dataset", "Adjusted effect", "Truth")) |>
+  gt() |>
+  fmt_number(columns = -Dataset)
+```
+
+## 5.3 Causal and Predictive Models, Revisited
+
+### 5.3.1 Prediction Metrics
+
+Predictive fit does not help either. Adding `covariate` to the model lowers RMSE and raises R-squared in every dataset, because the covariate contains associational information about the outcome regardless of causal structure. Improved prediction says nothing about whether the variable belongs in a causal model.
+
+```{r}
+#| label: tbl-predictive
+#| tbl-cap: "Change in RMSE and R-squared when covariate is added. Predictive improvement occurs in all four datasets regardless of causal role."
+
+get_rmse <- function(data, model) {
+  sqrt(mean((data$outcome - predict(model, data))^2))
+}
+
+get_r_squared <- function(model) {
+  summary(model)$r.squared
+}
+
+causal_quartet |>
+  nest_by(dataset) |>
+  mutate(
+    rmse_diff = get_rmse(data, lm(outcome ~ exposure + covariate, data = data)) -
+      get_rmse(data, lm(outcome ~ exposure, data = data)),
+    r_squared_diff = get_r_squared(lm(outcome ~ exposure + covariate, data = data)) -
+      get_r_squared(lm(outcome ~ exposure, data = data))
+  ) |>
+  select(dataset, rmse_diff, r_squared_diff) |>
+  ungroup() |>
+  gt() |>
+  fmt_number() |>
+  cols_label(
+    dataset = "Dataset",
+    rmse_diff = "Delta RMSE",
+    r_squared_diff = md("Delta R^2^")
+  )
+```
+
+There is also a collider-specific wrinkle: in dataset 1, you would not have `covariate` at prediction time because it happens after the exposure and outcome. So it is not even useful as a predictor there.
+
+### 5.3.2 The Table Two Fallacy
+
+The chapter closes with the Table Two Fallacy: the habit of reporting and interpreting every coefficient in a model as if each one answers a causal question about the outcome.
+
+In the confounder DAG, the model `outcome ~ exposure + covariate` gives an unbiased total effect for `exposure`. But from `covariate`'s vantage point, `exposure` is a mediator. The coefficient for `covariate` is the direct effect, not the total effect. The two coefficients in the same model answer different types of questions.
+
+```{r}
+#| label: fig-confounder-dag
+#| fig-cap: "The confounder DAG. From the perspective of covariate's effect on outcome, exposure is a mediator."
+
+quartet_confounder(x = "e", y = "o", z = "c") |>
+  tidy_dagitty() |>
+  mutate(covariate = if_else(label == "c", "covariate", NA_character_)) |>
+  ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_dag_point(aes(color = covariate)) +
+  geom_dag_edges(edge_color = "grey70") +
+  geom_dag_text(aes(label = label)) +
+  theme_dag() +
+  coord_cartesian(clip = "off") +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(
+    title = NULL,
+    keywidth = unit(1.4, "mm"),
+    override.aes = list(size = 3.4, shape = 15)
+  )) +
+  scale_color_discrete(breaks = "covariate", na.value = "grey70")
+```
+
+Add a fourth variable `q` that confounds the relationship between `covariate` and `outcome`, and things get worse: the model that correctly estimates the effect of `exposure` now produces a biased estimate for the effect of `covariate`, because `q` was not needed for the first question but is needed for the second.
+
+```{r}
+#| label: fig-confounder-q-dag
+#| fig-cap: "Extended confounder DAG with q. The adjustment sets for exposure and covariate differ."
+
+coords <- list(
+  x = c(X = 1.75, Z = 1, Y = 3, Q = 0),
+  y = c(X = 1.1, Z = 1.5, Y = 1, Q = 1)
+)
+
+dagify(
+  X ~ Z,
+  Y ~ X + Z + Q,
+  Z ~ Q,
+  exposure = "X",
+  outcome = "Y",
+  labels = c(X = "e", Y = "o", Z = "c", Q = "q"),
+  coords = coords
+) |>
+  tidy_dagitty() |>
+  mutate(covariate = if_else(name == "Q", "covariate", NA_character_)) |>
+  ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_dag_point(aes(color = covariate)) +
+  geom_dag_edges(edge_color = "grey70") +
+  geom_dag_text(aes(label = label)) +
+  theme_dag() +
+  coord_cartesian(clip = "off") +
+  theme(legend.position = "none") +
+  scale_color_discrete(breaks = "covariate", na.value = "grey70")
+```
+
+The bottom line: one model cannot necessarily answer two causal questions at once. If you want to report effects for multiple variables, check each one's adjustment set separately. When a single adjustment set covers both, you can proceed. When it does not, fit separate models or drop one of the questions.
+
+::: {.callout-note}
+## Key Takeaways
+
+Statistics, visualization, and predictive metrics are all necessary but none is sufficient for causal inference. The chapter makes three connected arguments:
+
+- Identical data can arise from structurally different causal graphs. You need background knowledge to distinguish them.
+- Time-ordering is a practical fallback when that knowledge is incomplete. Adjusting only for pre-exposure variables avoids many collider traps.
+- Predictive fit and coefficient significance do not validate a causal model. Each coefficient answers a question about a specific causal path, and that path depends on the full DAG.
+:::
