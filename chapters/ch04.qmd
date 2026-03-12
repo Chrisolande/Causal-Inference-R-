@@ -1,0 +1,854 @@
+```{r}
+#| label: setup
+#| echo: false
+
+library(ggdag)
+library(ggplot2)
+library(dplyr)
+library(purrr)
+library(tibble)
+library(patchwork)
+library(kableExtra)
+library(dagitty)
+library(broom)
+
+# Shared theme for all ggdag plots
+dag_theme <- theme_dag() %+replace%
+  theme(
+    legend.position  = "bottom",
+    strip.text.x     = element_text(margin = margin(2, 0, 2, 0, "mm")),
+    plot.title       = element_text(size = 13, face = "bold", hjust = 0),
+    plot.subtitle    = element_text(size = 11, colour = "grey40", hjust = 0)
+  )
+
+theme_set(dag_theme)
+
+# Shared ggplot2 theme for data plots
+data_theme <- theme_minimal(base_size = 13) +
+  theme(
+    panel.grid.minor = element_blank(),
+    strip.text       = element_text(face = "bold"),
+    legend.position  = "bottom"
+  )
+```
+
+# DAGs
+
+## Overview
+
+DAGs (Directed Acyclic Graphs) let researchers make their causal assumptions explicit and queryable. The chapter covers three things: what DAGs are and how their path types behave statistically, how to build and query them in R using `ggdag`, and practical advice on building defensible DAGs in applied work.
+
+---
+
+## 4.1 Visualizing Causal Assumptions
+
+A DAG is a graph where **nodes** are variables and **edges** are directed arrows representing causal relationships. The direction of an arrow encodes the direction of causation: `x -> y` means `x` causes `y`. Crucially, the graph must be *acyclic*: no variable can be its own ancestor.
+
+DAGs encode a researcher's assumptions about causal structure, not parameter estimates. An arrow says "I believe this cause exists for at least one unit"; it says nothing about the magnitude or functional form of the effect. This non-parametric character distinguishes causal DAGs from structural equation models (SEMs), which require parametric assumptions and estimate the entire graph.
+
+The three elemental path types are **forks**, **chains**, and **colliders**. Every backdoor path decomposes into these structures.
+
+```{r}
+#| label: fig-path-types
+#| fig-cap: "Three elemental causal path structures. Forks share a common cause; chains pass an effect through a mediator; colliders share a common descendant."
+
+coords <- list(
+  x = c(x = 0, y = 2, q = 1),
+  y = c(x = 0, y = 0, q = 1)
+)
+
+fork     <- dagify(x ~ q, y ~ q, exposure = "x", outcome = "y", coords = coords)
+chain    <- dagify(q ~ x, y ~ q, exposure = "x", outcome = "y", coords = coords)
+collider <- dagify(q ~ x + y, exposure = "x", outcome = "y", coords = coords)
+
+dag_flows <- map(
+  list(fork = fork, chain = chain, collider = collider),
+  tidy_dagitty
+) |>
+  map("data") |>
+  list_rbind(names_to = "dag") |>
+  mutate(dag = factor(dag, levels = c("fork", "chain", "collider")))
+
+dag_flows |>
+  ggplot(aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_dag_edges(edge_width = 1) +
+  geom_dag_point(colour = "#2c7bb6", size = 14) +
+  geom_dag_text(colour = "white", size = 4) +
+  facet_wrap(~dag) +
+  expand_plot(
+    expand_x = expansion(c(0.2, 0.2)),
+    expand_y = expansion(c(0.2, 0.2))
+  ) +
+  labs(title = "Elemental path structures in a DAG")
+```
+
+### Path types and what they imply
+
+```{r}
+#| label: tbl-path-types
+#| echo: false
+#| tbl-cap: "The three path structures, their statistical properties, and when to adjust."
+
+path_tbl <- tibble(
+  `Path type`       = c("Fork (confounder)", "Chain (mediator)", "Collider"),
+  `Direction of q`  = c("q -> x and q -> y", "x -> q -> y", "x -> q <- y"),
+  `Path status`     = c("Open", "Open", "Closed"),
+  `x-y correlated?` = c("Yes (spurious)", "Yes (via q)", "No"),
+  `Adjust for q?`   = c(
+    "Yes, blocks confounding",
+    "Depends on question (blocks indirect effect)",
+    "No, opens a biasing path"
+  )
+)
+
+path_tbl |>
+  kbl(booktabs = TRUE, align = c("l", "l", "c", "c", "l")) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width        = FALSE,
+    font_size         = 13
+  ) |>
+  column_spec(1, bold = TRUE) |>
+  column_spec(5, width = "20em") |>
+  row_spec(3, background = "#fff3cd")
+```
+
+::: {.callout-note}
+## Backdoor paths
+Any open, non-causal path from the exposure to the outcome is a **backdoor path**. Forks are the classic backdoor path. Conditioning on a collider can also *open* a previously closed path, creating a backdoor where none existed.
+:::
+
+---
+
+### Confounding in practice
+
+```{r}
+#| label: fig-confounder-scatter
+#| fig-cap: "A fork: q causes both x and y. Unadjusted, x and y appear correlated. Conditioning on q reveals the null relationship."
+
+set.seed(123)
+n <- 1000
+q_conf <- rbinom(n, size = 1, prob = 0.35)
+x_conf <- 2 * q_conf + rnorm(n)
+y_conf <- -3 * q_conf + rnorm(n)
+confounder_data <- tibble(x = x_conf, y = y_conf, q = as.factor(q_conf))
+
+p_conf1 <- confounder_data |>
+  ggplot(aes(x, y)) +
+  geom_point(alpha = 0.15, colour = "#636363") +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, colour = "#d7191c", linewidth = 1) +
+  facet_wrap(~"Not adjusting for q\n(biased)") +
+  data_theme
+
+p_conf2 <- confounder_data |>
+  ggplot(aes(x, y, colour = q)) +
+  geom_point(alpha = 0.15) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, linewidth = 1) +
+  scale_colour_manual(values = c("0" = "#2c7bb6", "1" = "#fdae61")) +
+  facet_wrap(~"Adjusting for q\n(unbiased)") +
+  data_theme
+
+p_conf1 + p_conf2 +
+  plot_annotation(
+    title    = "Fork: spurious association removed by conditioning on the common cause",
+    theme    = theme(plot.title = element_text(size = 13, face = "bold"))
+  )
+```
+
+### Mediation in practice
+
+```{r}
+#| label: fig-mediator-scatter
+#| fig-cap: "A chain: adjusting for the mediator q removes the indirect effect and leaves only the direct (null) effect."
+
+set.seed(123)
+x_med <- rnorm(n)
+lp    <- 2 * x_med + rnorm(n)
+q_med <- rbinom(n, size = 1, prob = 1 / (1 + exp(-lp)))
+y_med <- 2 * q_med + rnorm(n)
+mediator_data <- tibble(x = x_med, y = y_med, q = as.factor(q_med))
+
+p_med1 <- mediator_data |>
+  ggplot(aes(x, y)) +
+  geom_point(alpha = 0.15, colour = "#636363") +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, colour = "#1a9641", linewidth = 1) +
+  facet_wrap(~"Not adjusting for q\n(total effect)") +
+  data_theme
+
+p_med2 <- mediator_data |>
+  ggplot(aes(x, y, colour = q)) +
+  geom_point(alpha = 0.15) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, linewidth = 1) +
+  scale_colour_manual(values = c("0" = "#2c7bb6", "1" = "#fdae61")) +
+  facet_wrap(~"Adjusting for q\n(direct effect)") +
+  data_theme
+
+p_med1 + p_med2 +
+  plot_annotation(
+    title = "Chain: adjustment for mediator isolates the direct effect",
+    theme = theme(plot.title = element_text(size = 13, face = "bold"))
+  )
+```
+
+### Collider bias in practice
+
+```{r}
+#| label: fig-collider-scatter
+#| fig-cap: "A collider: x and y are independent, but conditioning on q induces a spurious association."
+
+set.seed(123)
+x_col   <- rnorm(n)
+y_col   <- rnorm(n)
+lp_col  <- 2 * x_col + 3 * y_col + rnorm(n)
+q_col   <- rbinom(n, size = 1, prob = 1 / (1 + exp(-lp_col)))
+collider_data <- tibble(x = x_col, y = y_col, q = as.factor(q_col))
+
+p_col1 <- collider_data |>
+  ggplot(aes(x, y)) +
+  geom_point(alpha = 0.15, colour = "#636363") +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, colour = "#1a9641", linewidth = 1) +
+  facet_wrap(~"Not adjusting for q\n(unbiased)") +
+  data_theme
+
+p_col2 <- collider_data |>
+  ggplot(aes(x, y, colour = q)) +
+  geom_point(alpha = 0.15) +
+  geom_smooth(method = "lm", formula = y ~ x, se = FALSE, linewidth = 1) +
+  scale_colour_manual(values = c("0" = "#2c7bb6", "1" = "#d7191c")) +
+  facet_wrap(~"Adjusting for q\n(biased, collider opened)") +
+  data_theme
+
+p_col1 + p_col2 +
+  plot_annotation(
+    title = "Collider: conditioning opens a bias path that wasn't there",
+    theme = theme(plot.title = element_text(size = 13, face = "bold"))
+  )
+```
+
+---
+
+## 4.2 DAGs in R with ggdag
+
+The `ggdag` package wraps `dagitty` with a tidy, ggplot2-compatible interface.
+
+```{r}
+#| label: tbl-dagify-args
+#| echo: false
+#| tbl-cap: "Key arguments to dagify()."
+
+tibble(
+  Argument     = c("formulas", "exposure", "outcome", "latent", "coords", "labels"),
+  Type         = c("formula...", "character", "character", "character", "list/data.frame", "named character"),
+  Purpose      = c(
+    "Specify causal relationships (effect ~ cause1 + cause2)",
+    "Exposure variable for path queries",
+    "Outcome variable for path queries",
+    "Mark unmeasured variables; excluded from adjustment sets",
+    "Node positions; use time_ordered_coords() for temporal ordering",
+    "Human-readable labels for display"
+  )
+) |>
+  kbl(booktabs = TRUE, align = c("l", "l", "l")) |>
+  kable_styling(
+    bootstrap_options = c("striped", "condensed"),
+    full_width        = FALSE,
+    font_size         = 13
+  ) |>
+  column_spec(1, bold = TRUE, monospace = TRUE) |>
+  column_spec(2, monospace = TRUE) |>
+  column_spec(3, width = "28em")
+```
+
+### Podcast exam running example
+
+The running example asks: does listening to a comedy podcast the morning before an exam improve graduate students' test scores?
+
+```{r}
+#| label: fig-podcast-dag
+#| fig-cap: "Proposed DAG for the podcast exam question. No direct arrow from podcast to exam score is assumed."
+
+podcast_dag <- dagify(
+  podcast ~ mood + humor + prepared,
+  exam    ~ mood + prepared,
+  coords  = time_ordered_coords(
+    list(
+      c("prepared", "humor", "mood"),
+      "podcast",
+      "exam"
+    )
+  ),
+  exposure = "podcast",
+  outcome  = "exam",
+  labels   = c(
+    podcast  = "podcast",
+    exam     = "exam score",
+    mood     = "mood",
+    humor    = "humor",
+    prepared = "prepared"
+  )
+)
+
+ggdag(podcast_dag, use_labels = "label", text = FALSE) +
+  labs(title = "Podcast exam DAG")
+```
+
+### Open paths and adjustment sets
+
+```{r}
+#| label: fig-podcast-paths
+#| fig-cap: "Two open backdoor paths in podcast_dag: one through mood, one through prepared."
+
+ggdag_paths(podcast_dag, shadow = TRUE, text = FALSE, use_labels = "label") +
+  labs(title = "Open paths in podcast_dag")
+```
+
+```{r}
+#| label: fig-podcast-adjset
+#| fig-cap: "Minimal adjustment set for podcast_dag. Both mood and prepared must be adjusted to block all backdoor paths."
+
+ggdag_adjustment_set(podcast_dag, text = FALSE, use_labels = "label") +
+  labs(title = "Minimal adjustment set")
+```
+
+### Simulated demonstration
+
+```{r}
+#| label: fig-sim-correct
+#| fig-cap: "Adjusting for the correct set (mood + prepared) recovers the null effect. The unadjusted estimate is spurious."
+
+set.seed(10)
+sim_data <- simulate_data(podcast_dag)
+
+unadjusted_model <- lm(exam ~ podcast, sim_data) |>
+  tidy(conf.int = TRUE) |>
+  filter(term == "podcast") |>
+  mutate(formula = "unadjusted")
+
+adjusted_model <- lm(exam ~ podcast + mood + prepared, sim_data) |>
+  tidy(conf.int = TRUE) |>
+  filter(term == "podcast") |>
+  mutate(formula = "mood + prepared")
+
+bind_rows(unadjusted_model, adjusted_model) |>
+  ggplot(aes(x = estimate, y = formula, xmin = conf.low, xmax = conf.high)) +
+  geom_vline(xintercept = 0, linewidth = 1, colour = "grey75") +
+  geom_pointrange(linewidth = 1, size = 0.6, colour = "#2c7bb6") +
+  labs(
+    x       = "Estimated effect of podcast on exam",
+    y       = NULL,
+    caption = "True effect = 0",
+    title   = "Correct adjustment set recovers the null"
+  ) +
+  data_theme
+```
+
+::: {.callout-warning}
+## Wrong DAG, wrong answer
+If the DAG is mis-specified, for instance by omitting `mood` as a confounder, then even after adjustment the estimate remains biased. DAG correctness is a prerequisite; the algebra cannot fix a wrong causal story.
+:::
+
+---
+
+## 4.3 Structures of Causality
+
+### 4.3.1 Advanced confounding
+
+Backdoor paths need not pass through a single common cause. In a more complex version of the podcast DAG, adding `alertness` (caused by `mood`) and `skills_course` (which frees up time for podcasts and drives preparedness) creates three backdoor paths and four valid minimal adjustment sets.
+
+```{r}
+#| label: fig-podcast-dag2
+#| fig-cap: "Expanded podcast DAG with alertness and skills_course. Three backdoor paths must be closed."
+
+podcast_dag2 <- dagify(
+  podcast      ~ mood + humor + skills_course,
+  alertness    ~ mood,
+  mood         ~ humor,
+  prepared     ~ skills_course,
+  exam         ~ alertness + prepared,
+  coords       = time_ordered_coords(),
+  exposure     = "podcast",
+  outcome      = "exam",
+  labels       = c(
+    podcast      = "podcast",
+    exam         = "exam score",
+    mood         = "mood",
+    alertness    = "alertness",
+    skills_course = "college\nskills course",
+    humor        = "humor",
+    prepared     = "prepared"
+  )
+)
+
+ggdag(podcast_dag2, use_labels = "label", text = FALSE) +
+  labs(title = "Expanded podcast DAG")
+```
+
+```{r}
+#| label: fig-podcast-dag2-adjsets
+#| fig-cap: "Four minimal adjustment sets for podcast_dag2. Each set closes all three backdoor paths."
+
+ggdag_adjustment_set(podcast_dag2, use_labels = "label", text = FALSE) +
+  labs(title = "Minimal adjustment sets, expanded DAG")
+```
+
+```{r}
+#| label: tbl-adjsets
+#| echo: false
+#| tbl-cap: "Valid minimal adjustment sets for the expanded podcast DAG and considerations for choosing between them."
+
+tibble(
+  `Adjustment set`             = c(
+    "alertness + prepared",
+    "alertness + skills_course",
+    "mood + prepared",
+    "mood + skills_course"
+  ),
+  `Backdoor paths closed`      = rep("All three", 4),
+  `Practical considerations`   = c(
+    "Alertness may be hard to measure accurately",
+    "skills_course is objectively verifiable; preferred if well measured",
+    "mood + prepared are familiar confounders with moderate measurement quality",
+    "skills_course is cleanly measured; mood may vary by self-report quality"
+  )
+) |>
+  kbl(booktabs = TRUE) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width        = FALSE,
+    font_size         = 13
+  ) |>
+  column_spec(1, bold = TRUE, monospace = TRUE) |>
+  column_spec(3, width = "24em") |>
+  row_spec(2, background = "#d4edda")
+```
+
+### 4.3.2 Selection bias and mediation
+
+Selection bias is collider-stratification bias induced by the study design itself, the act of selecting units into the sample. If showing up to the exam (`showed_up`) is caused by both `podcast` and other confounders, inherently conditioning on that variable (by only observing those who showed up) opens a collider path.
+
+```{r}
+#| label: fig-podcast-dag3
+#| fig-cap: "podcast_dag3: showed_up is both a collider and a mediator. Inherent stratification on this variable limits what causal effect we can estimate."
+
+podcast_dag3 <- dagify(
+  podcast    ~ mood + humor + prepared,
+  exam       ~ mood + prepared + showed_up,
+  showed_up  ~ podcast + mood + prepared,
+  coords     = time_ordered_coords(
+    list(
+      c("prepared", "humor", "mood"),
+      "podcast",
+      "showed_up",
+      "exam"
+    )
+  ),
+  exposure   = "podcast",
+  outcome    = "exam",
+  labels     = c(
+    podcast   = "podcast",
+    exam      = "exam score",
+    mood      = "mood",
+    humor     = "humor",
+    prepared  = "prepared",
+    showed_up = "showed up"
+  )
+)
+
+ggdag(podcast_dag3, use_labels = "label", text = FALSE) +
+  labs(title = "Selection into sample as a collider-mediator")
+```
+
+When the total effect is unrecoverable (indirect path blocked at `showed_up`), the direct effect can sometimes still be estimated.
+
+```{r}
+#| label: fig-podcast-dag3-direct
+#| fig-cap: "Switching the estimand from total to direct effect yields a valid adjustment set even after conditioning on showed_up."
+
+podcast_dag3 |>
+  adjust_for("showed_up") |>
+  ggdag_adjustment_set(effect = "direct", text = FALSE, use_labels = "label") +
+  labs(title = "Direct effect adjustment set after inherent conditioning on showed_up")
+```
+
+#### M-bias and butterfly bias
+
+M-bias occurs when a pre-exposure collider, `m`, is caused by two unmeasured variables `a` and `b` that separately cause the exposure and outcome. The path through `m` is closed by default; conditioning on `m` opens it.
+
+```{r}
+#| label: fig-m-bias
+#| fig-cap: "M-bias: m is a collider that predates exposure and outcome. The backdoor path x <- a -> m <- b -> y is closed; conditioning on m opens it."
+
+m_bias() |>
+  ggdag() +
+  labs(title = "M-bias structure")
+```
+
+Butterfly (bowtie) bias combines M-bias with confounding: `mood` is both a confounder (must be adjusted) and a collider (adjustment opens a path). When the unmeasured causes are absent from data, there is no clean solution. Empirical guidance: confounding bias tends to be larger than collider bias from M-structures, so adjusting is still the lesser evil.
+
+```{r}
+#| label: fig-butterfly
+#| fig-cap: "Butterfly bias: mood is simultaneously a confounder and a collider. Controlling for mood blocks confounding but opens the collider path via u1 and u2."
+
+butterfly_bias(x = "podcast", y = "exam", m = "mood", a = "u1", b = "u2") |>
+  ggdag(text = FALSE, use_labels = "label") +
+  labs(title = "Butterfly (bowtie) bias")
+```
+
+### 4.3.3 Instrumental variables and precision variables
+
+```{r}
+#| label: tbl-iv-precision
+#| echo: false
+#| tbl-cap: "Comparison of instrumental variables and precision variables."
+
+tibble(
+  Property            = c(
+    "Causes exposure?",
+    "Causes outcome?",
+    "On a backdoor path?",
+    "Include in adjustment model?",
+    "Effect on point estimate",
+    "Effect on variance",
+    "Alternative use"
+  ),
+  `Instrumental variable (e.g., humor)` = c(
+    "Yes", "No (by assumption)", "No",
+    "Avoid unless suspected confounder",
+    "Usually negligible bias if wrongly added",
+    "May slightly inflate SE",
+    "IV methods (Chapter 22)"
+  ),
+  `Precision variable (e.g., grader_mood)` = c(
+    "No", "Yes", "No",
+    "Yes, always include when available",
+    "None",
+    "Reduces variance, narrower CIs",
+    "n/a"
+  )
+) |>
+  kbl(booktabs = TRUE) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width        = FALSE,
+    font_size         = 13
+  ) |>
+  column_spec(1, bold = TRUE) |>
+  column_spec(2, width = "16em") |>
+  column_spec(3, width = "16em")
+```
+
+```{r}
+#| label: fig-podcast-dag5
+#| fig-cap: "humor is an IV (causes podcast, not exam); grader_mood is a precision variable (causes exam, not podcast)."
+
+podcast_dag5 <- dagify(
+  podcast     ~ mood + humor + prepared,
+  exam        ~ mood + prepared + grader_mood,
+  coords      = time_ordered_coords(
+    list(
+      c("prepared", "humor", "mood"),
+      c("podcast", "grader_mood"),
+      "exam"
+    )
+  ),
+  exposure    = "podcast",
+  outcome     = "exam",
+  labels      = c(
+    podcast     = "podcast",
+    exam        = "exam score",
+    mood        = "student\nmood",
+    humor       = "humor",
+    prepared    = "prepared",
+    grader_mood = "grader\nmood"
+  )
+)
+
+ggdag(podcast_dag5, use_labels = "label", text = FALSE) +
+  labs(title = "IV (humor) and precision variable (grader_mood) in podcast DAG")
+```
+
+### 4.3.4 Measurement error and missingness
+
+Separating the *true* value of a variable from its *observed* value in the DAG exposes how measurement bias enters the causal estimate. In recall bias, the outcome influences the exposure measurement error, introducing a non-causal association between observed exposure and outcome.
+
+```{r}
+#| label: fig-error-dag
+#| fig-cap: "Measurement error DAG: outcome_real causes exposure_error, creating recall bias. The observed exposure is a biased proxy for the true exposure."
+
+error_dag <- dagify(
+  exposure_observed ~ exposure_real + exposure_error,
+  outcome_observed  ~ outcome_real + outcome_error,
+  outcome_real      ~ exposure_real,
+  exposure_error    ~ outcome_real,
+  labels            = c(
+    exposure_real     = "Exposure\n(truth)",
+    exposure_error    = "Measurement\nerror (exposure)",
+    exposure_observed = "Exposure\n(observed)",
+    outcome_real      = "Outcome\n(truth)",
+    outcome_error     = "Measurement\nerror (outcome)",
+    outcome_observed  = "Outcome\n(observed)"
+  ),
+  exposure = "exposure_real",
+  outcome  = "outcome_real",
+  coords   = time_ordered_coords()
+)
+
+ggdag(error_dag, text = FALSE, use_labels = "label") +
+  labs(title = "Recall bias: outcome influences memory of exposure")
+```
+
+---
+
+## 4.4 Recommendations for Building DAGs
+
+### Summary table
+
+```{r}
+#| label: tbl-dag-advice
+#| echo: false
+#| tbl-cap: "Ten recommendations for building defensible DAGs."
+
+tibble(
+  `#`             = 1:10,
+  Recommendation  = c(
+    "Iterate early and often",
+    "Consider your question",
+    "Order nodes by time",
+    "Consider the whole data collection process",
+    "Include variables you don't have",
+    "Saturate your DAG, then prune",
+    "Include instruments and precision variables",
+    "Focus on causal structure first, then measurement bias",
+    "Pick adjustment sets most likely to succeed",
+    "Use robustness checks"
+  ),
+  Detail          = c(
+    "Build the DAG before analysis, ideally before data collection. Share with domain experts and iterate.",
+    "The causal structure varies by population and time. What is a confounder in one setting may be irrelevant in another.",
+    "Time ordering clarifies assumptions (cause precedes effect) and makes complex DAGs easier to read.",
+    "Found data inherits conditioning on the collection mechanism. Understand selection into your sample.",
+    "Mark unmeasured variables as latent; ggdag returns only adjustment sets feasible with your data.",
+    "Default to including arrows; not-including is the stronger assumption. Prune only implausible arrows.",
+    "Neither type changes the adjustment set, but both inform modeling decisions and can flag IV opportunities.",
+    "Start with a perfectly-measured DAG; then overlay measurement error as a sensitivity exercise.",
+    "When multiple valid sets exist, prefer the one with better-measured, better-modeled variables.",
+    "Negative controls, DAG-data consistency checks, and alternate adjustment sets all stress-test your assumptions."
+  )
+) |>
+  kbl(booktabs = TRUE) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width        = TRUE,
+    font_size         = 13
+  ) |>
+  column_spec(1, width = "2em", bold = TRUE) |>
+  column_spec(2, bold = TRUE, width = "14em") |>
+  column_spec(3, width = "34em") |>
+  row_spec(c(1, 3, 6, 9), background = "#f0f4ff")
+```
+
+### Saturate then prune (worked example)
+
+```{r}
+#| label: fig-podcast-sat
+#| fig-cap: "Fully saturated version of podcast_dag: every variable has arrows to all later variables."
+
+podcast_dag_sat <- dagify(
+  podcast  ~ mood + humor + prepared,
+  exam     ~ mood + prepared + humor,
+  prepared ~ humor,
+  mood     ~ humor,
+  coords   = time_ordered_coords(
+    list("humor", c("prepared", "mood"), "podcast", "exam")
+  ),
+  exposure = "podcast",
+  outcome  = "exam",
+  labels   = c(
+    podcast  = "podcast",
+    exam     = "exam score",
+    mood     = "mood",
+    humor    = "humor",
+    prepared = "prepared"
+  )
+)
+
+curvatures      <- rep(0, 8)
+curvatures[1]   <- 0.25
+
+podcast_dag_sat |>
+  tidy_dagitty() |>
+  ggplot(aes(x, y, xend = xend, yend = yend, label = label)) +
+  geom_dag_point(colour = "#2c7bb6", size = 14) +
+  geom_dag_edges_arc(curvature = curvatures) +
+  geom_dag_label_repel(aes(label = label), show.legend = FALSE) +
+  labs(title = "Saturated podcast DAG")
+```
+
+```{r}
+#| label: fig-podcast-pruned
+#| fig-cap: "Pruned DAG: implausible arrows (humor -> prepared and humor -> exam, since grading is blinded) removed."
+
+podcast_dag_pruned <- dagify(
+  podcast  ~ mood + humor + prepared,
+  exam     ~ mood + prepared,
+  mood     ~ humor,
+  coords   = time_ordered_coords(
+    list("humor", c("prepared", "mood"), "podcast", "exam")
+  ),
+  exposure = "podcast",
+  outcome  = "exam",
+  labels   = c(
+    podcast  = "podcast",
+    exam     = "exam score",
+    mood     = "mood",
+    humor    = "humor",
+    prepared = "prepared"
+  )
+)
+
+ggdag(podcast_dag_pruned, text = FALSE, use_labels = "label") +
+  labs(title = "Pruned podcast DAG, implausible arrows removed")
+```
+
+Both the saturated and pruned DAGs share the same minimal adjustment set (`mood + prepared`), showing that the pruning decision doesn't change what must be adjusted here.
+
+### Feedback loops are feedforward loops
+
+Apparent feedback loops are actually variables co-evolving through time. Expressing this correctly as a time-unrolled DAG avoids the cyclic violation.
+
+```{r}
+#| label: fig-feedforward
+#| fig-cap: "A/C use and global temperature co-evolve over time. The cyclic mental model unfolds into a feedforward DAG."
+
+dagify(
+  global_temp_2000 ~ ac_use_1990 + global_temp_1990,
+  ac_use_2000      ~ ac_use_1990 + global_temp_1990,
+  global_temp_2010 ~ ac_use_2000 + global_temp_2000,
+  ac_use_2010      ~ ac_use_2000 + global_temp_2000,
+  global_temp_2020 ~ ac_use_2010 + global_temp_2010,
+  ac_use_2020      ~ ac_use_2010 + global_temp_2010,
+  coords           = time_ordered_coords(),
+  labels           = c(
+    ac_use_1990      = "A/C use\n(1990)",
+    global_temp_1990 = "Temp\n(1990)",
+    ac_use_2000      = "A/C use\n(2000)",
+    global_temp_2000 = "Temp\n(2000)",
+    ac_use_2010      = "A/C use\n(2010)",
+    global_temp_2010 = "Temp\n(2010)",
+    ac_use_2020      = "A/C use\n(2020)",
+    global_temp_2020 = "Temp\n(2020)"
+  )
+) |>
+  ggdag(text = FALSE, use_labels = "label") +
+  labs(title = "Feedback loop unrolled as a time-ordered feedforward DAG")
+```
+
+---
+
+## DAG properties in applied health research
+
+The table below summarises empirical properties of DAGs used in 144 applied health research papers (Tennant et al. 2020).
+
+```{r}
+#| label: tbl-dag-properties
+#| echo: false
+#| tbl-cap: "Empirical properties of 144 DAGs in applied health research (Tennant et al. 2020). Most DAGs were only ~46% saturated; fewer than a third reported their estimand."
+
+tibble(
+  Characteristic           = c(
+    "Number of nodes",
+    "Number of arcs",
+    "Node-to-arc ratio",
+    "Saturation proportion",
+    "Fully saturated, Yes",
+    "Fully saturated, No",
+    "Reported estimand, Yes",
+    "Reported estimand, No",
+    "Reported adjustment set, Yes",
+    "Reported adjustment set, No"
+  ),
+  `N = 144`                = c(
+    "12 (IQR: 9-16)",
+    "29 (IQR: 19-42)",
+    "2.30 (IQR: 1.75-3.00)",
+    "0.46 (IQR: 0.31-0.67)",
+    "4 (3%)",
+    "140 (97%)",
+    "40 (28%)",
+    "104 (72%)",
+    "80 (56%)",
+    "64 (44%)"
+  )
+) |>
+  kbl(booktabs = TRUE) |>
+  kable_styling(
+    bootstrap_options = c("striped", "condensed"),
+    full_width        = FALSE,
+    font_size         = 13
+  ) |>
+  pack_rows("DAG properties", 1, 6) |>
+  pack_rows("Reporting", 7, 10) |>
+  column_spec(1, width = "20em") |>
+  column_spec(2, width = "14em") |>
+  row_spec(c(5, 7, 9), bold = TRUE, background = "#fff3cd")
+```
+
+---
+
+## Key concepts glossary
+
+```{r}
+#| label: tbl-glossary
+#| echo: false
+#| tbl-cap: "Key terms from Chapter 4."
+
+tibble(
+  Term                       = c(
+    "DAG", "SCM", "Node / Edge", "Fork",
+    "Chain", "Collider", "Open path",
+    "Closed path", "Backdoor path",
+    "Adjustment set", "Collider-stratification bias",
+    "Instrumental variable",
+    "Precision variable",
+    "Sharp null", "Proxy confounder"
+  ),
+  Definition = c(
+    "Directed Acyclic Graph, a causal diagram with directed arrows and no cycles",
+    "Structural Causal Model, the class of non-parametric models that DAGs belong to",
+    "Node: a variable. Edge: a directed arrow encoding a causal relationship",
+    "q -> x and q -> y: shared common cause; open path; induces confounding",
+    "x -> q -> y: effect passes through mediator; open path; blocks causal flow if adjusted",
+    "x -> q <- y: shared descendant; closed path; conditioning on it opens a biasing path",
+    "A path that transmits statistical association between exposure and outcome",
+    "A path that does not transmit association (e.g., at a collider)",
+    "Any open, non-causal path from exposure to outcome that must be blocked",
+    "A set of variables that, when adjusted, blocks all backdoor paths",
+    "Bias introduced by conditioning on a collider (also called selection bias)",
+    "A cause of exposure only, not outcome; useful for IV estimation methods",
+    "A cause of outcome only, not exposure; reduces variance when included in model",
+    "No unit has an individual causal effect; justifies removing an arrow",
+    "A measured variable correlated with an unmeasured confounder; reduces but rarely eliminates confounding"
+  )
+) |>
+  kbl(booktabs = TRUE) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width        = TRUE,
+    font_size         = 12
+  ) |>
+  column_spec(1, bold = TRUE, width = "12em") |>
+  column_spec(2, width = "36em")
+```
+
+---
+
+::: {.callout-tip}
+## Chapter connections
+- **Chapter 10** covers estimands in depth (what are you actually trying to estimate?).  
+- **Chapter 14** covers interaction and effect modification.  
+- **Chapter 15** covers measurement error and missingness.  
+- **Chapter 16** covers sensitivity analysis, including robustness checks.  
+- **Chapter 17** covers causal mediation analysis.  
+- **Chapter 18** covers time-varying confounding and feedforward relationships.  
+- **Chapter 22** covers instrumental variable methods.  
+:::
