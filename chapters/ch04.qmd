@@ -1,6 +1,6 @@
 ```{r}
 #| label: setup
-#| echo: false
+#| include: false
 
 library(ggdag)
 library(ggplot2)

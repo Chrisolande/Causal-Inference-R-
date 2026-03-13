@@ -1,17 +1,5 @@
----
-title: "Chapter 5: Causal Inference Is Not (Just) a Statistical Problem"
-subtitle: "Summary of *Causal Inference in R*, Chapter 5"
-date: today
-format:
-  html:
-    toc: true
-    toc-depth: 3
-    code-fold: true
-    theme: cosmo
-execute:
-  warning: false
-  message: false
----
+
+# Causal Inference is not (just) a statistical problem
 
 ## Overview
 
@@ -353,3 +341,4 @@ Statistics, visualization, and predictive metrics are all necessary but none is 
 - Time-ordering is a practical fallback when that knowledge is incomplete. Adjusting only for pre-exposure variables avoids many collider traps.
 - Predictive fit and coefficient significance do not validate a causal model. Each coefficient answers a question about a specific causal path, and that path depends on the full DAG.
 :::
+
