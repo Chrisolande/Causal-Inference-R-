@@ -1,0 +1,566 @@
+---
+title: "Causal Inference in R"
+subtitle: "Chapter summaries"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    theme: cosmo
+    embed-resources: true
+execute:
+  warning: false
+  message: false
+---
+
+```{r setup}
+#| echo: false
+library(tibble)
+library(kableExtra)
+```
+
+::: {.callout-important}
+## License and attribution
+
+These summaries are a derivative work of *Causal Inference in R* by Malcolm Barrett,
+Lucy D'Agostino McGowan, and Travis Gerke, published at
+[r-causal.org](https://www.r-causal.org/).
+
+The original work is copyright the authors and licensed under
+[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).
+This derivative is released under the same license.
+
+In practice: credit the original authors when you share or adapt this material.
+Do not use it commercially. If you are unsure whether your use qualifies as
+non-commercial, read the
+[CC BY-NC 4.0 deed](https://creativecommons.org/licenses/by-nc/4.0/).
+:::
+
+---
+
+The book has one central question: given data you did not design, can you make a
+credible causal claim? Not a predictive one. Not a correlational one. A causal
+one: what would happen if you *intervened*?
+
+That framing rules a lot out. RCTs are not covered because they sidestep the hard
+parts. The whole point of the book is the harder, messier, more common situation:
+data collected by someone else, for reasons that may have nothing to do with your
+question, where the exposure was not assigned at random and you have to be explicit
+about every assumption you are making.
+
+Prerequisites are light: tidyverse fluency, basic R modelling (`lm()`, `glm()`),
+and comfort writing functions. tidymodels appears later but no prior exposure is
+assumed.
+
+```{r roadmap-table}
+#| echo: false
+#| tbl-cap: "24 chapters across three parts."
+
+tibble(
+  Part = c(
+    rep("Part I: Asking Causal Questions", 6),
+    rep("Part II: The Design Phase", 3),
+    rep("Part III: Estimating Causal Effects", 15)
+  ),
+  Ch = paste0("Ch ", 1:24),
+  Title = c(
+    "From casual to causal",
+    "The whole game: mosquito nets and malaria",
+    "Potential outcomes and counterfactuals",
+    "Expressing causal questions as DAGs",
+    "Causal inference is not (just) a statistical problem",
+    "From question to answer: stratification and outcome models",
+    "Preparing data to answer causal questions",
+    "Propensity scores",
+    "Evaluating your propensity score model",
+    "Causal estimands",
+    "Fitting the weighted outcome model",
+    "Continuous and categorical exposures",
+    "G-computation",
+    "Interaction",
+    "Missingness and measurement",
+    "Sensitivity analysis",
+    "Causal mediation analysis",
+    "Causal inference across time",
+    "Causal time-to-event models",
+    "Doubly robust models",
+    "Machine learning and causal inference",
+    "Instrumental variables and friends",
+    "Difference-in-difference",
+    "Evidence"
+  )
+) |>
+  kbl(
+    col.names = c("Part", "Ch", "Title"),
+    booktabs = TRUE,
+    align = c("l", "c", "l")
+  ) |>
+  kable_styling(
+    bootstrap_options = c("striped", "condensed", "hover"),
+    full_width = TRUE
+  ) |>
+  column_spec(2, bold = TRUE, width = "6%") |>
+  collapse_rows(columns = 1, valign = "top")
+```
+
+---
+
+## Part I: Asking Causal Questions
+
+Before any method makes sense, you need the framework. What is a causal effect,
+exactly? How do you write down your assumptions? Why does data alone never settle
+the causation question? Six chapters. They repay slow reading.
+
+---
+
+### Ch 1: From casual to causal
+
+*Association vs. causation · causal questions · counterfactuals*
+
+Most statistical training is about association. This chapter argues that is the
+wrong frame for a large class of questions people actually care about. Knowing
+that X and Y move together tells you nothing about what happens when you *change* X.
+
+The distinction the book draws between descriptive, predictive, and causal
+questions is not pedantic. It has real consequences. A predictive model
+optimised for accuracy will often mislead you if you try to use it causally. The
+sentence-diagram framework (*does X cause Y, among population Z, compared to
+doing W, over horizon T*) is worth internalising early. Every word in that
+sentence affects what you are estimating, and dropping one tends to make the
+question unanswerable rather than simpler.
+
+---
+
+### Ch 2: The whole game
+
+*End-to-end example · confounding · IPW · DAGs*
+
+A complete causal analysis before any of the theory gets deep. The question is
+straightforward: do insecticide-treated mosquito nets reduce malaria risk?
+
+The confounding problem is immediate. Wealthier, healthier households are more
+likely to use nets and less likely to get malaria, for reasons unrelated to nets.
+Naively comparing users to non-users overstates protection. The chapter walks
+through DAG construction, covariate identification, propensity scoring, and
+inverse probability weighting, none of it explained in full yet. The point is
+to see the whole pipeline once before studying each piece. Reading this chapter
+again after finishing the book is genuinely useful.
+
+---
+
+### Ch 3: Potential outcomes and counterfactuals
+
+*Potential outcomes · exchangeability · positivity · consistency · SUTVA · target trial*
+
+The theoretical core. The central problem is that you can only ever observe one
+version of what happened. The counterfactual is permanently missing. Causal
+inference is, at root, a missing data problem.
+
+The potential outcomes framework defines the individual causal effect as
+$Y(1) - Y(0)$. Since only one is observed per person, individual effects are
+unidentifiable. The average treatment effect is what we can go after, but only
+under three conditions. Exchangeability: no unmeasured confounding, so treatment
+groups have the same potential outcomes on average. Positivity: every unit has a
+non-zero probability of receiving any exposure level, within all covariate strata.
+Consistency (SUTVA): the observed outcome equals the potential outcome for the
+received exposure, with no multiple treatment versions and no interference between
+units.
+
+Randomisation satisfies all three in the limit. Observational data does not, which
+is why the rest of the book exists. The chapter closes with target trial emulation:
+write down the RCT you would run if you could, then map each protocol element to
+your observed data. It is a more disciplined organising framework than it first
+sounds.
+
+---
+
+### Ch 4: Expressing causal questions as DAGs
+
+*DAGs · d-separation · confounding · colliders · mediators · ggdag*
+
+DAGs make assumptions explicit and auditable. A node per variable, a directed edge
+per causal relationship, no cycles. The graph does not claim to be the truth. It
+commits to your current best guess, which can then be examined and challenged by
+people who know the subject matter differently.
+
+D-separation is the graphical rule for reading off conditional independencies,
+which translates directly to covariate selection: adjust for backdoor paths, do
+not adjust for mediators, and be very careful about colliders.
+
+Colliders are the most counterintuitive part. Conditioning on a common effect of
+treatment and outcome (including it in a regression or restricting the sample on
+it) opens a spurious association that does not exist in the full population. A
+lot of analysts introduce bias while thinking they are tightening up the analysis.
+`ggdag` handles visualisation and d-separation queries in R.
+
+---
+
+### Ch 5: Causal inference is not (just) a statistical problem
+
+*Domain knowledge · unmeasured confounding · assumptions · bias*
+
+The hardest chapter to act on, because it tells you something statistical training
+actively obscures: no method substitutes for knowing the subject.
+
+The identifiability conditions from Chapter 3, especially exchangeability, cannot
+be verified from data. You can check balance, test functional form, run sensitivity
+analyses. None of that tells you whether you have adjusted for the right
+confounders. That is a question about the world. Two analysts with the same data
+but different domain knowledge will reach different conclusions, and both might be
+defensible.
+
+More controls is not always safer. Conditioning on a collider is worse than not
+adjusting at all. Adjusting for a post-treatment variable introduces bias. Knowing
+which variables belong in a model and which do not is inseparable from
+understanding the subject matter.
+
+---
+
+### Ch 6: From question to answer
+
+*Stratification · regression adjustment · g-computation · marginal standardisation*
+
+With the framework in place, two approaches to actually estimating an effect.
+
+Stratification compares treatment and control within covariate levels. Transparent,
+easy to explain, and it collapses fast. Too many variables or any continuous
+covariates and you run out of observations per stratum.
+
+Outcome modelling solves the dimensionality problem. Fit $E[Y \mid X, Z]$, predict
+counterfactual outcomes for every unit under each exposure, then average the
+difference. This is g-computation, also called marginal standardisation. The key
+point is that the ATE is not just the coefficient on $X$ in the outcome model.
+That coefficient is only the causal effect under specific functional form
+assumptions. The predict-and-average procedure is more general.
+
+---
+
+## Part II: The Design Phase
+
+Chapters 7-9 slow down on a step that is easy to skip: getting the data and
+propensity model right before touching the outcome. A propensity model with high
+predictive accuracy can still leave substantial confounding, and you will not
+catch that from AUC alone.
+
+---
+
+### Ch 7: Preparing data to answer causal questions
+
+*Data preparation · covariate selection · eligibility criteria · temporal ordering*
+
+Before fitting anything: who is included, what the exposure measures, what the
+baseline period is, and which covariates are needed for conditional exchangeability.
+The DAG does the work here. Covariate selection driven by stepwise procedures or
+variable importance is unreliable for causal inference. You need variables that
+block backdoor paths, not variables that predict the outcome well. Related, but
+different criteria.
+
+Temporal ordering is often overlooked. A covariate measured after the exposure
+started cannot be a confounder. Conditioning on it either introduces bias or
+blocks a mediation path. Getting this wrong is common and hard to detect from the
+data alone.
+
+---
+
+### Ch 8: Propensity scores
+
+*Propensity scores · IPW · tidymodels · overlap · weighting*
+
+The propensity score $e(Z) = P(\text{treatment} \mid Z)$ collapses the covariate
+adjustment problem to a single number. Its balancing property means weighting or
+stratifying on it achieves the same result as adjusting for all covariates
+individually.
+
+The main use is inverse probability weighting: weight each unit by the inverse of
+its probability of receiving the treatment it actually received, creating a
+pseudo-population where treatment is unrelated to covariates. One thing worth
+getting right: a good propensity model is not one with high AUC. It is one that
+achieves covariate balance after weighting. Optimising for prediction can actively
+hurt balance. Propensity models are fit using `tidymodels`.
+
+---
+
+### Ch 9: Evaluating your propensity score model
+
+*Balance · SMD · love plots · overlap · halfmoon*
+
+Standard predictive diagnostics do not tell you whether a propensity model works
+for causal inference. The right diagnostic is standardised mean differences (SMDs)
+before and after weighting, which directly show whether covariate distributions
+are similar across treatment groups.
+
+Love plots display SMDs for every covariate. The target is below 0.1. Overlap
+plots check positivity visually. Extreme weights are a warning sign: some units
+were nearly certain to receive or not receive treatment regardless of covariates,
+which inflates variance and signals near-positivity violations. Options are to
+trim extreme weights, revisit the covariate set, or narrow the target population.
+The `halfmoon` package handles these diagnostics.
+
+---
+
+## Part III: Estimating Causal Effects
+
+Chapters 10-24. Standard IPW and g-computation first, then continuous exposures,
+time-varying treatments, survival outcomes, effect modification, machine learning,
+IV, and DiD. Each chapter builds on the framework from Parts I and II.
+
+---
+
+### Ch 10: Causal estimands
+
+*ATE · ATT · ATC · estimands · target population*
+
+Before fitting a model, decide what you are estimating. The Average Treatment
+Effect (ATE) asks what would happen if everyone received treatment versus none.
+The Average Treatment Effect on the Treated (ATT) asks what happened to those who
+actually received it. These are different quantities and require different
+estimators.
+
+ATT is usually more appropriate when the treated group is a specific subgroup and
+you want to know whether treatment helped them. ATE fits questions about policies
+that would apply broadly. The estimand choice also affects which positivity
+violations matter, a detail that compounds through the analysis.
+
+---
+
+### Ch 11: Fitting the weighted outcome model
+
+*IPW · weighted regression · sandwich SE · bootstrap*
+
+With a validated propensity model, fit the outcome model using IPW weights. The
+technical complication is standard errors: naive SEs from weighted regression are
+wrong because they treat the weights as fixed rather than estimated. Bootstrap SEs
+(resample observations, refit both models in each draw) or sandwich SEs fix this.
+The chapter is direct about which to prefer and when.
+
+---
+
+### Ch 12: Continuous and categorical exposures
+
+*Continuous treatment · dose-response · generalised propensity score · categorical exposure*
+
+For continuous exposures, the propensity score generalises to a conditional density
+$f(X \mid Z)$. Weights from this density stabilise the marginal distribution of
+the exposure, and the estimand becomes a dose-response curve rather than a single
+average effect. For multi-level categorical exposures the approach extends
+naturally; the main decisions are about contrasts and reference categories.
+
+---
+
+### Ch 13: G-computation
+
+*G-computation · marginal standardisation · parametric g-formula*
+
+G-computation is the outcome-modelling alternative to IPW. Fit $E[Y \mid X, Z]$,
+predict each unit's counterfactual outcome under treatment and under control,
+average the difference. Often more efficient than IPW when the outcome model is
+well-specified, and more sensitive to outcome model misspecification when it is
+not. That tradeoff motivates the doubly robust methods in Chapter 20.
+
+---
+
+### Ch 14: Interaction
+
+*Effect modification · heterogeneous effects · CATE · additive vs. multiplicative*
+
+The ATE is an average, and averages hide a lot. Treatment effects vary across
+subgroups. This is effect modification. The chapter distinguishes statistical
+interaction from causal effect modification and covers conditional average
+treatment effects (CATEs). Interaction on the additive scale and on the
+multiplicative scale are not the same thing, and which scale matters depends on
+whether you care about absolute or relative risk differences.
+
+---
+
+### Ch 15: Missingness and measurement
+
+*Missing data · MCAR/MAR/MNAR · multiple imputation · measurement error*
+
+MCAR does not bias estimates but reduces precision. MAR is handled well by
+multiple imputation. MNAR requires sensitivity analysis: the missingness depends
+on unobserved values, so the mechanism is unidentifiable from data alone.
+
+Measurement error in the exposure attenuates effects toward zero. Measurement
+error in confounders is worse: residual confounding remains even after adjustment.
+Neither has a clean fix without auxiliary data or strong assumptions, but the
+chapter makes the magnitude of bias concrete.
+
+---
+
+### Ch 16: Sensitivity analysis
+
+*Unmeasured confounding · E-value · tipping point · tipr*
+
+The E-value asks how strong an unmeasured confounder would need to be to explain
+away the observed effect. Large E-values suggest robustness; small ones signal
+fragility. Tipping point analysis finds the unmeasured confounding parameters that
+would shift the confidence interval past the null. Both characterise
+vulnerability: they tell you how fragile the estimate is, not whether the
+lurking confounder actually exists. The `tipr` package implements these in R.
+
+---
+
+### Ch 17: Causal mediation analysis
+
+*Mediation · direct effects · indirect effects · interventional effects*
+
+When you want to know how a treatment works, you need mediation analysis. The
+total effect decomposes into direct and indirect effects. The traditional
+Baron-Kenny approach does not work for causal inference: it ignores
+treatment-mediator interaction and does not handle confounding of the
+mediator-outcome path. The chapter uses the interventional effects framework. The
+identifying assumptions are stricter than for total effects. Conditional
+exchangeability is needed for both the treatment-outcome and mediator-outcome
+relationships, with no treatment-induced confounders of the mediator-outcome path.
+
+---
+
+### Ch 18: Causal inference across time
+
+*Longitudinal data · time-varying confounding · marginal structural models*
+
+With time-varying treatments and confounders, standard regression breaks. A
+time-varying covariate can simultaneously be a confounder of the current treatment
+(adjust for it) and a mediator of past treatment (do not condition on it). Ordinary
+regression cannot do both.
+
+Marginal structural models with time-varying IPW handle this. Weights are
+constructed from the full treatment history and the outcome model fits the weighted
+pseudo-population. The longitudinal g-formula is the parametric alternative. Both
+require careful attention to temporal ordering.
+
+---
+
+### Ch 19: Causal time-to-event models
+
+*Survival analysis · hazard ratios · competing risks · RMST · non-collapsibility*
+
+Hazard ratios from Cox models are non-collapsible: even in a randomised trial, the
+marginal hazard ratio differs from the conditional one. This is not a data problem.
+It is a mathematical property that complicates cross-study comparisons. The
+restricted mean survival time (RMST) does not have this property and is more
+directly interpretable. Competing risks are also covered: cause-specific and
+subdistribution hazards answer different causal questions, and confusing them
+changes the conclusion.
+
+---
+
+### Ch 20: Doubly robust models
+
+*AIPW · doubly robust · TMLE · semiparametric efficiency*
+
+Doubly robust estimators combine a propensity model and an outcome model so that
+correct specification of either is sufficient for consistency. The augmented IPW
+(AIPW) estimator is the main one covered. TMLE directly targets the causal
+estimand during estimation. Both are semiparametrically efficient when both models
+are correct, and both pair naturally with machine learning nuisance models.
+
+---
+
+### Ch 21: Machine learning and causal inference
+
+*Causal forests · cross-fitting · double machine learning · CATE*
+
+ML nuisance models can fit complex confounding structures without pre-specified
+functional form. Used naively, regularisation introduces bias that does not vanish
+with sample size. Cross-fitting removes this asymptotically: fit nuisance models
+on held-out folds, then rotate. Causal forests directly target heterogeneous
+treatment effects without pre-specifying which subgroups to examine. Useful when
+the CATEs are the actual question.
+
+---
+
+### Ch 22: Instrumental variables and friends
+
+*IV · LATE · 2SLS · regression discontinuity · natural experiments*
+
+When unmeasured confounding makes exchangeability untenable, IV exploits a
+variable that affects treatment but has no direct effect on the outcome. Two things
+worth keeping in mind. Valid instruments are hard to find, and the exclusion
+restriction is unverifiable from data. IV estimates the LATE (the effect among
+compliers), which may not be the population you care about.
+
+Regression discontinuity uses sharp thresholds in treatment assignment to estimate
+local causal effects near the boundary. Compelling when the design is clean,
+limited in external validity.
+
+---
+
+### Ch 23: Difference-in-differences
+
+*DiD · parallel trends · panel data · staggered adoption · TWFE*
+
+DiD uses a control group's pre-post trajectory as the counterfactual for the
+treated group. The identifying assumption is parallel trends: both groups would
+have moved together absent treatment.
+
+With staggered adoption, the standard two-way fixed effects regression produces a
+weighted average where some weights can be negative even when every individual
+effect is positive. The chapter covers heterogeneity-robust estimators designed
+for this setting and discusses how pre-treatment periods can be used to assess
+(not verify) the parallel trends assumption.
+
+---
+
+### Ch 24: Evidence
+
+*Evidence synthesis · replication · communication · uncertainty*
+
+A single well-executed analysis rarely settles a question. Evidence accumulates
+across studies with different designs, populations, and assumptions. The chapter
+covers what statistical significance does and does not mean, what replication and
+robustness checks add, and how to communicate causal claims honestly, including
+the assumptions and their potential failures. Reporting results without making
+assumptions visible is not being concise. It is removing the information people
+need to evaluate whether your conclusions apply to their context.
+
+---
+
+## Suggested reading paths
+
+```{r reading-paths}
+#| echo: false
+#| tbl-cap: "Minimum chapter sequences for common goals."
+
+tibble(
+  Goal = c(
+    "Understand the framework before running anything",
+    "Run a complete IPW analysis end-to-end",
+    "Handle time-varying treatments",
+    "Analyse survival outcomes causally",
+    "Estimate heterogeneous treatment effects",
+    "Unmeasured confounding is a real concern",
+    "Exploit a natural experiment or policy threshold"
+  ),
+  Path = c(
+    "1 → 3 → 4 → 5",
+    "1 → 3 → 4 → 7 → 8 → 9 → 10 → 11",
+    "1-11 → 18",
+    "1-11 → 19",
+    "1-11 → 14 → 20 → 21",
+    "1-5 → 16 → 22",
+    "1-5 → 22 → 23"
+  )
+) |>
+  kbl(
+    col.names = c("Goal", "Chapters"),
+    booktabs = TRUE,
+    align = c("l", "l")
+  ) |>
+  kable_styling(
+    bootstrap_options = c("striped", "condensed", "hover"),
+    full_width = TRUE
+  ) |>
+  column_spec(1, width = "60%") |>
+  column_spec(2, bold = TRUE, width = "40%")
+```
+
+---
+
+::: {.small}
+These summaries are a derivative work of *Causal Inference in R* (Barrett,
+D'Agostino McGowan and Gerke, 2026, [r-causal.org](https://www.r-causal.org/)).
+The original text is copyright the authors. License:
+[CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Non-commercial
+use only.
+:::

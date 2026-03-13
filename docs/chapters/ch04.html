@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.550">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Causal Inference in R - Chapter Summaries - DAGs</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/ch05.html" rel="next">
+<link href="../chapters/ch03.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/ch04.html"><span class="chapter-title">Shared theme for all ggdag plots</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Causal Inference in R - Chapter Summaries</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/malcolmbarrett/causal-inference-in-r" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">License and attribution</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch01.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">From casual to causal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch02.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">The Whole Game: Mosquito Nets and Malaria</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch03.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter3: Potential Outcomes and Counterfactuals</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch04.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Shared theme for all ggdag plots</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch05.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Causal Inference is not (just) a statistical problem</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch06.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">From question to answer: Stratification and outcome models</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#visualizing-causal-assumptions" id="toc-visualizing-causal-assumptions" class="nav-link" data-scroll-target="#visualizing-causal-assumptions">4.1 Visualizing Causal Assumptions</a>
+  <ul class="collapse">
+  <li><a href="#path-types-and-what-they-imply" id="toc-path-types-and-what-they-imply" class="nav-link" data-scroll-target="#path-types-and-what-they-imply">Path types and what they imply</a></li>
+  <li><a href="#confounding-in-practice" id="toc-confounding-in-practice" class="nav-link" data-scroll-target="#confounding-in-practice">Confounding in practice</a></li>
+  <li><a href="#mediation-in-practice" id="toc-mediation-in-practice" class="nav-link" data-scroll-target="#mediation-in-practice">Mediation in practice</a></li>
+  <li><a href="#collider-bias-in-practice" id="toc-collider-bias-in-practice" class="nav-link" data-scroll-target="#collider-bias-in-practice">Collider bias in practice</a></li>
+  </ul></li>
+  <li><a href="#dags-in-r-with-ggdag" id="toc-dags-in-r-with-ggdag" class="nav-link" data-scroll-target="#dags-in-r-with-ggdag">4.2 DAGs in R with ggdag</a>
+  <ul class="collapse">
+  <li><a href="#podcast-exam-running-example" id="toc-podcast-exam-running-example" class="nav-link" data-scroll-target="#podcast-exam-running-example">Podcast exam running example</a></li>
+  <li><a href="#open-paths-and-adjustment-sets" id="toc-open-paths-and-adjustment-sets" class="nav-link" data-scroll-target="#open-paths-and-adjustment-sets">Open paths and adjustment sets</a></li>
+  <li><a href="#simulated-demonstration" id="toc-simulated-demonstration" class="nav-link" data-scroll-target="#simulated-demonstration">Simulated demonstration</a></li>
+  </ul></li>
+  <li><a href="#structures-of-causality" id="toc-structures-of-causality" class="nav-link" data-scroll-target="#structures-of-causality">4.3 Structures of Causality</a>
+  <ul class="collapse">
+  <li><a href="#advanced-confounding" id="toc-advanced-confounding" class="nav-link" data-scroll-target="#advanced-confounding">4.3.1 Advanced confounding</a></li>
+  <li><a href="#selection-bias-and-mediation" id="toc-selection-bias-and-mediation" class="nav-link" data-scroll-target="#selection-bias-and-mediation">4.3.2 Selection bias and mediation</a></li>
+  <li><a href="#instrumental-variables-and-precision-variables" id="toc-instrumental-variables-and-precision-variables" class="nav-link" data-scroll-target="#instrumental-variables-and-precision-variables">4.3.3 Instrumental variables and precision variables</a></li>
+  <li><a href="#measurement-error-and-missingness" id="toc-measurement-error-and-missingness" class="nav-link" data-scroll-target="#measurement-error-and-missingness">4.3.4 Measurement error and missingness</a></li>
+  </ul></li>
+  <li><a href="#recommendations-for-building-dags" id="toc-recommendations-for-building-dags" class="nav-link" data-scroll-target="#recommendations-for-building-dags">4.4 Recommendations for Building DAGs</a>
+  <ul class="collapse">
+  <li><a href="#summary-table" id="toc-summary-table" class="nav-link" data-scroll-target="#summary-table">Summary table</a></li>
+  <li><a href="#saturate-then-prune-worked-example" id="toc-saturate-then-prune-worked-example" class="nav-link" data-scroll-target="#saturate-then-prune-worked-example">Saturate then prune (worked example)</a></li>
+  <li><a href="#feedback-loops-are-feedforward-loops" id="toc-feedback-loops-are-feedforward-loops" class="nav-link" data-scroll-target="#feedback-loops-are-feedforward-loops">Feedback loops are feedforward loops</a></li>
+  </ul></li>
+  <li><a href="#dag-properties-in-applied-health-research" id="toc-dag-properties-in-applied-health-research" class="nav-link" data-scroll-target="#dag-properties-in-applied-health-research">DAG properties in applied health research</a></li>
+  <li><a href="#key-concepts-glossary" id="toc-key-concepts-glossary" class="nav-link" data-scroll-target="#key-concepts-glossary">Key concepts glossary</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/malcolmbarrett/causal-inference-in-r/blob/main/chapters/ch04.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/malcolmbarrett/causal-inference-in-r/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">DAGs</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<p>DAGs (Directed Acyclic Graphs) let researchers make their causal assumptions explicit and queryable. The chapter covers three things: what DAGs are and how their path types behave statistically, how to build and query them in R using <code>ggdag</code>, and practical advice on building defensible DAGs in applied work.</p>
+<hr>
+</section>
+<section id="visualizing-causal-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-causal-assumptions">4.1 Visualizing Causal Assumptions</h2>
+<p>A DAG is a graph where <strong>nodes</strong> are variables and <strong>edges</strong> are directed arrows representing causal relationships. The direction of an arrow encodes the direction of causation: <code>x -&gt; y</code> means <code>x</code> causes <code>y</code>. Crucially, the graph must be <em>acyclic</em>: no variable can be its own ancestor.</p>
+<p>DAGs encode a researcher’s assumptions about causal structure, not parameter estimates. An arrow says “I believe this cause exists for at least one unit”; it says nothing about the magnitude or functional form of the effect. This non-parametric character distinguishes causal DAGs from structural equation models (SEMs), which require parametric assumptions and estimate the entire graph.</p>
+<p>The three elemental path types are <strong>forks</strong>, <strong>chains</strong>, and <strong>colliders</strong>. Every backdoor path decomposes into these structures.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>coords <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">2</span>, <span class="at">q =</span> <span class="dv">1</span>),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="fu">c</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">q =</span> <span class="dv">1</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>fork     <span class="ot">&lt;-</span> <span class="fu">dagify</span>(x <span class="sc">~</span> q, y <span class="sc">~</span> q, <span class="at">exposure =</span> <span class="st">"x"</span>, <span class="at">outcome =</span> <span class="st">"y"</span>, <span class="at">coords =</span> coords)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>chain    <span class="ot">&lt;-</span> <span class="fu">dagify</span>(q <span class="sc">~</span> x, y <span class="sc">~</span> q, <span class="at">exposure =</span> <span class="st">"x"</span>, <span class="at">outcome =</span> <span class="st">"y"</span>, <span class="at">coords =</span> coords)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>collider <span class="ot">&lt;-</span> <span class="fu">dagify</span>(q <span class="sc">~</span> x <span class="sc">+</span> y, <span class="at">exposure =</span> <span class="st">"x"</span>, <span class="at">outcome =</span> <span class="st">"y"</span>, <span class="at">coords =</span> coords)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>dag_flows <span class="ot">&lt;-</span> <span class="fu">map</span>(</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">fork =</span> fork, <span class="at">chain =</span> chain, <span class="at">collider =</span> collider),</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  tidy_dagitty</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(<span class="st">"data"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>(<span class="at">names_to =</span> <span class="st">"dag"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dag =</span> <span class="fu">factor</span>(dag, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"fork"</span>, <span class="st">"chain"</span>, <span class="st">"collider"</span>)))</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>dag_flows <span class="sc">|&gt;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">xend =</span> xend, <span class="at">yend =</span> yend)) <span class="sc">+</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_edges</span>(<span class="at">edge_width =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_point</span>(<span class="at">colour =</span> <span class="st">"#2c7bb6"</span>, <span class="at">size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_text</span>(<span class="at">colour =</span> <span class="st">"white"</span>, <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>dag) <span class="sc">+</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">expand_plot</span>(</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">expand_x =</span> <span class="fu">expansion</span>(<span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.2</span>)),</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">expand_y =</span> <span class="fu">expansion</span>(<span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.2</span>))</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Elemental path structures in a DAG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-path-types" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-path-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-path-types-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-path-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.1: Three elemental causal path structures. Forks share a common cause; chains pass an effect through a mediator; colliders share a common descendant.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="path-types-and-what-they-imply" class="level3">
+<h3 class="anchored" data-anchor-id="path-types-and-what-they-imply">Path types and what they imply</h3>
+<div class="cell">
+<div id="tbl-path-types" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-path-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.1: The three path structures, their statistical properties, and when to adjust.
+</figcaption>
+<div aria-describedby="tbl-path-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Path type</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Direction of q</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">Path status</th>
+<th style="text-align: center;" data-quarto-table-cell-role="th">x-y correlated?</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Adjust for q?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">Fork (confounder)</td>
+<td style="text-align: left;">q -&gt; x and q -&gt; y</td>
+<td style="text-align: center;">Open</td>
+<td style="text-align: center;">Yes (spurious)</td>
+<td style="text-align: left; width: 20em;">Yes, blocks confounding</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">Chain (mediator)</td>
+<td style="text-align: left;">x -&gt; q -&gt; y</td>
+<td style="text-align: center;">Open</td>
+<td style="text-align: center;">Yes (via q)</td>
+<td style="text-align: left; width: 20em;">Depends on question (blocks indirect effect)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; background-color: rgba(255, 243, 205, 255) !important;">Collider</td>
+<td style="text-align: left; background-color: rgba(255, 243, 205, 255) !important;">x -&gt; q &lt;- y</td>
+<td style="text-align: center; background-color: rgba(255, 243, 205, 255) !important;">Closed</td>
+<td style="text-align: center; background-color: rgba(255, 243, 205, 255) !important;">No</td>
+<td style="text-align: left; width: 20em; background-color: rgba(255, 243, 205, 255) !important;">No, opens a biasing path</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Backdoor paths
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Any open, non-causal path from the exposure to the outcome is a <strong>backdoor path</strong>. Forks are the classic backdoor path. Conditioning on a collider can also <em>open</em> a previously closed path, creating a backdoor where none existed.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="confounding-in-practice" class="level3">
+<h3 class="anchored" data-anchor-id="confounding-in-practice">Confounding in practice</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>q_conf <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.35</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>x_conf <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> q_conf <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>y_conf <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">3</span> <span class="sc">*</span> q_conf <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>confounder_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x =</span> x_conf, <span class="at">y =</span> y_conf, <span class="at">q =</span> <span class="fu">as.factor</span>(q_conf))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>p_conf1 <span class="ot">&lt;-</span> confounder_data <span class="sc">|&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(x, y)) <span class="sc">+</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.15</span>, <span class="at">colour =</span> <span class="st">"#636363"</span>) <span class="sc">+</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">colour =</span> <span class="st">"#d7191c"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span><span class="st">"Not adjusting for q</span><span class="sc">\n</span><span class="st">(biased)"</span>) <span class="sc">+</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  data_theme</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>p_conf2 <span class="ot">&lt;-</span> confounder_data <span class="sc">|&gt;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(x, y, <span class="at">colour =</span> q)) <span class="sc">+</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.15</span>) <span class="sc">+</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"0"</span> <span class="ot">=</span> <span class="st">"#2c7bb6"</span>, <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"#fdae61"</span>)) <span class="sc">+</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span><span class="st">"Adjusting for q</span><span class="sc">\n</span><span class="st">(unbiased)"</span>) <span class="sc">+</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  data_theme</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>p_conf1 <span class="sc">+</span> p_conf2 <span class="sc">+</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">title    =</span> <span class="st">"Fork: spurious association removed by conditioning on the common cause"</span>,</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">theme    =</span> <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">13</span>, <span class="at">face =</span> <span class="st">"bold"</span>))</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-confounder-scatter" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-confounder-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-confounder-scatter-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-confounder-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.2: A fork: q causes both x and y. Unadjusted, x and y appear correlated. Conditioning on q reveals the null relationship.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="mediation-in-practice" class="level3">
+<h3 class="anchored" data-anchor-id="mediation-in-practice">Mediation in practice</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>x_med <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>lp    <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> x_med <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>q_med <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>lp)))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>y_med <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> q_med <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>mediator_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x =</span> x_med, <span class="at">y =</span> y_med, <span class="at">q =</span> <span class="fu">as.factor</span>(q_med))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>p_med1 <span class="ot">&lt;-</span> mediator_data <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(x, y)) <span class="sc">+</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.15</span>, <span class="at">colour =</span> <span class="st">"#636363"</span>) <span class="sc">+</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">colour =</span> <span class="st">"#1a9641"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span><span class="st">"Not adjusting for q</span><span class="sc">\n</span><span class="st">(total effect)"</span>) <span class="sc">+</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  data_theme</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>p_med2 <span class="ot">&lt;-</span> mediator_data <span class="sc">|&gt;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(x, y, <span class="at">colour =</span> q)) <span class="sc">+</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.15</span>) <span class="sc">+</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"0"</span> <span class="ot">=</span> <span class="st">"#2c7bb6"</span>, <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"#fdae61"</span>)) <span class="sc">+</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span><span class="st">"Adjusting for q</span><span class="sc">\n</span><span class="st">(direct effect)"</span>) <span class="sc">+</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  data_theme</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>p_med1 <span class="sc">+</span> p_med2 <span class="sc">+</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Chain: adjustment for mediator isolates the direct effect"</span>,</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">theme =</span> <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">13</span>, <span class="at">face =</span> <span class="st">"bold"</span>))</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-mediator-scatter" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mediator-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-mediator-scatter-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mediator-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.3: A chain: adjusting for the mediator q removes the indirect effect and leaves only the direct (null) effect.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="collider-bias-in-practice" class="level3">
+<h3 class="anchored" data-anchor-id="collider-bias-in-practice">Collider bias in practice</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>x_col   <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>y_col   <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>lp_col  <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> x_col <span class="sc">+</span> <span class="dv">3</span> <span class="sc">*</span> y_col <span class="sc">+</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>q_col   <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>lp_col)))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>collider_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x =</span> x_col, <span class="at">y =</span> y_col, <span class="at">q =</span> <span class="fu">as.factor</span>(q_col))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>p_col1 <span class="ot">&lt;-</span> collider_data <span class="sc">|&gt;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(x, y)) <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.15</span>, <span class="at">colour =</span> <span class="st">"#636363"</span>) <span class="sc">+</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">colour =</span> <span class="st">"#1a9641"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span><span class="st">"Not adjusting for q</span><span class="sc">\n</span><span class="st">(unbiased)"</span>) <span class="sc">+</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  data_theme</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>p_col2 <span class="ot">&lt;-</span> collider_data <span class="sc">|&gt;</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(x, y, <span class="at">colour =</span> q)) <span class="sc">+</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.15</span>) <span class="sc">+</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"0"</span> <span class="ot">=</span> <span class="st">"#2c7bb6"</span>, <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"#d7191c"</span>)) <span class="sc">+</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span><span class="st">"Adjusting for q</span><span class="sc">\n</span><span class="st">(biased, collider opened)"</span>) <span class="sc">+</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  data_theme</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>p_col1 <span class="sc">+</span> p_col2 <span class="sc">+</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Collider: conditioning opens a bias path that wasn't there"</span>,</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">theme =</span> <span class="fu">theme</span>(<span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">13</span>, <span class="at">face =</span> <span class="st">"bold"</span>))</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-collider-scatter" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-collider-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-collider-scatter-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-collider-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.4: A collider: x and y are independent, but conditioning on q induces a spurious association.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="dags-in-r-with-ggdag" class="level2">
+<h2 class="anchored" data-anchor-id="dags-in-r-with-ggdag">4.2 DAGs in R with ggdag</h2>
+<p>The <code>ggdag</code> package wraps <code>dagitty</code> with a tidy, ggplot2-compatible interface.</p>
+<div class="cell">
+<div id="tbl-dagify-args" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dagify-args-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.2: Key arguments to dagify().
+</figcaption>
+<div aria-describedby="tbl-dagify-args-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Argument</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Type</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-family: monospace;">formulas</td>
+<td style="text-align: left; font-family: monospace;">formula...</td>
+<td style="text-align: left; width: 28em;">Specify causal relationships (effect ~ cause1 + cause2)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold; font-family: monospace;">exposure</td>
+<td style="text-align: left; font-family: monospace;">character</td>
+<td style="text-align: left; width: 28em;">Exposure variable for path queries</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-family: monospace;">outcome</td>
+<td style="text-align: left; font-family: monospace;">character</td>
+<td style="text-align: left; width: 28em;">Outcome variable for path queries</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold; font-family: monospace;">latent</td>
+<td style="text-align: left; font-family: monospace;">character</td>
+<td style="text-align: left; width: 28em;">Mark unmeasured variables; excluded from adjustment sets</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-family: monospace;">coords</td>
+<td style="text-align: left; font-family: monospace;">list/data.frame</td>
+<td style="text-align: left; width: 28em;">Node positions; use time_ordered_coords() for temporal ordering</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold; font-family: monospace;">labels</td>
+<td style="text-align: left; font-family: monospace;">named character</td>
+<td style="text-align: left; width: 28em;">Human-readable labels for display</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<section id="podcast-exam-running-example" class="level3">
+<h3 class="anchored" data-anchor-id="podcast-exam-running-example">Podcast exam running example</h3>
+<p>The running example asks: does listening to a comedy podcast the morning before an exam improve graduate students’ test scores?</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>podcast_dag <span class="ot">&lt;-</span> <span class="fu">dagify</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  podcast <span class="sc">~</span> mood <span class="sc">+</span> humor <span class="sc">+</span> prepared,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  exam    <span class="sc">~</span> mood <span class="sc">+</span> prepared,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords  =</span> <span class="fu">time_ordered_coords</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(<span class="st">"prepared"</span>, <span class="st">"humor"</span>, <span class="st">"mood"</span>),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"podcast"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">"exam"</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">exposure =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome  =</span> <span class="st">"exam"</span>,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels   =</span> <span class="fu">c</span>(</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">podcast  =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">exam     =</span> <span class="st">"exam score"</span>,</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">mood     =</span> <span class="st">"mood"</span>,</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">humor    =</span> <span class="st">"humor"</span>,</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">prepared =</span> <span class="st">"prepared"</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggdag</span>(podcast_dag, <span class="at">use_labels =</span> <span class="st">"label"</span>, <span class="at">text =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Podcast exam DAG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-podcast-dag" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-podcast-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-podcast-dag-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-podcast-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.5: Proposed DAG for the podcast exam question. No direct arrow from podcast to exam score is assumed.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="open-paths-and-adjustment-sets" class="level3">
+<h3 class="anchored" data-anchor-id="open-paths-and-adjustment-sets">Open paths and adjustment sets</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggdag_paths</span>(podcast_dag, <span class="at">shadow =</span> <span class="cn">TRUE</span>, <span class="at">text =</span> <span class="cn">FALSE</span>, <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Open paths in podcast_dag"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-podcast-paths" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-podcast-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-podcast-paths-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-podcast-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.6: Two open backdoor paths in podcast_dag: one through mood, one through prepared.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggdag_adjustment_set</span>(podcast_dag, <span class="at">text =</span> <span class="cn">FALSE</span>, <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Minimal adjustment set"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-podcast-adjset" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-podcast-adjset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-podcast-adjset-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-podcast-adjset-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.7: Minimal adjustment set for podcast_dag. Both mood and prepared must be adjusted to block all backdoor paths.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="simulated-demonstration" class="level3">
+<h3 class="anchored" data-anchor-id="simulated-demonstration">Simulated demonstration</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">10</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>sim_data <span class="ot">&lt;-</span> <span class="fu">simulate_data</span>(podcast_dag)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>unadjusted_model <span class="ot">&lt;-</span> <span class="fu">lm</span>(exam <span class="sc">~</span> podcast, sim_data) <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">==</span> <span class="st">"podcast"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">formula =</span> <span class="st">"unadjusted"</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>adjusted_model <span class="ot">&lt;-</span> <span class="fu">lm</span>(exam <span class="sc">~</span> podcast <span class="sc">+</span> mood <span class="sc">+</span> prepared, sim_data) <span class="sc">|&gt;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">conf.int =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(term <span class="sc">==</span> <span class="st">"podcast"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">formula =</span> <span class="st">"mood + prepared"</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">bind_rows</span>(unadjusted_model, adjusted_model) <span class="sc">|&gt;</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> estimate, <span class="at">y =</span> formula, <span class="at">xmin =</span> conf.low, <span class="at">xmax =</span> conf.high)) <span class="sc">+</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">colour =</span> <span class="st">"grey75"</span>) <span class="sc">+</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_pointrange</span>(<span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="fl">0.6</span>, <span class="at">colour =</span> <span class="st">"#2c7bb6"</span>) <span class="sc">+</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">x       =</span> <span class="st">"Estimated effect of podcast on exam"</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">y       =</span> <span class="cn">NULL</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">"True effect = 0"</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">title   =</span> <span class="st">"Correct adjustment set recovers the null"</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  data_theme</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-sim-correct" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sim-correct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-sim-correct-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sim-correct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.8: Adjusting for the correct set (mood + prepared) recovers the null effect. The unadjusted estimate is spurious.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Wrong DAG, wrong answer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>If the DAG is mis-specified, for instance by omitting <code>mood</code> as a confounder, then even after adjustment the estimate remains biased. DAG correctness is a prerequisite; the algebra cannot fix a wrong causal story.</p>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="structures-of-causality" class="level2">
+<h2 class="anchored" data-anchor-id="structures-of-causality">4.3 Structures of Causality</h2>
+<section id="advanced-confounding" class="level3">
+<h3 class="anchored" data-anchor-id="advanced-confounding">4.3.1 Advanced confounding</h3>
+<p>Backdoor paths need not pass through a single common cause. In a more complex version of the podcast DAG, adding <code>alertness</code> (caused by <code>mood</code>) and <code>skills_course</code> (which frees up time for podcasts and drives preparedness) creates three backdoor paths and four valid minimal adjustment sets.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>podcast_dag2 <span class="ot">&lt;-</span> <span class="fu">dagify</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  podcast      <span class="sc">~</span> mood <span class="sc">+</span> humor <span class="sc">+</span> skills_course,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  alertness    <span class="sc">~</span> mood,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  mood         <span class="sc">~</span> humor,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  prepared     <span class="sc">~</span> skills_course,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  exam         <span class="sc">~</span> alertness <span class="sc">+</span> prepared,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords       =</span> <span class="fu">time_ordered_coords</span>(),</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">exposure     =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome      =</span> <span class="st">"exam"</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels       =</span> <span class="fu">c</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">podcast      =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">exam         =</span> <span class="st">"exam score"</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">mood         =</span> <span class="st">"mood"</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">alertness    =</span> <span class="st">"alertness"</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">skills_course =</span> <span class="st">"college</span><span class="sc">\n</span><span class="st">skills course"</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">humor        =</span> <span class="st">"humor"</span>,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">prepared     =</span> <span class="st">"prepared"</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="fu">ggdag</span>(podcast_dag2, <span class="at">use_labels =</span> <span class="st">"label"</span>, <span class="at">text =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Expanded podcast DAG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-podcast-dag2" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-podcast-dag2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-podcast-dag2-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-podcast-dag2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.9: Expanded podcast DAG with alertness and skills_course. Three backdoor paths must be closed.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggdag_adjustment_set</span>(podcast_dag2, <span class="at">use_labels =</span> <span class="st">"label"</span>, <span class="at">text =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Minimal adjustment sets, expanded DAG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-podcast-dag2-adjsets" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-podcast-dag2-adjsets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-podcast-dag2-adjsets-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-podcast-dag2-adjsets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.10: Four minimal adjustment sets for podcast_dag2. Each set closes all three backdoor paths.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-adjsets" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-adjsets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.3: Valid minimal adjustment sets for the expanded podcast DAG and considerations for choosing between them.
+</figcaption>
+<div aria-describedby="tbl-adjsets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Adjustment set</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Backdoor paths closed</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Practical considerations</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-family: monospace;">alertness + prepared</td>
+<td style="text-align: left;">All three</td>
+<td style="text-align: left; width: 24em;">Alertness may be hard to measure accurately</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold; font-family: monospace; background-color: rgba(212, 237, 218, 255) !important;">alertness + skills_course</td>
+<td style="text-align: left; background-color: rgba(212, 237, 218, 255) !important;">All three</td>
+<td style="text-align: left; width: 24em; background-color: rgba(212, 237, 218, 255) !important;">skills_course is objectively verifiable; preferred if well measured</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; font-family: monospace;">mood + prepared</td>
+<td style="text-align: left;">All three</td>
+<td style="text-align: left; width: 24em;">mood + prepared are familiar confounders with moderate measurement quality</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold; font-family: monospace;">mood + skills_course</td>
+<td style="text-align: left;">All three</td>
+<td style="text-align: left; width: 24em;">skills_course is cleanly measured; mood may vary by self-report quality</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="selection-bias-and-mediation" class="level3">
+<h3 class="anchored" data-anchor-id="selection-bias-and-mediation">4.3.2 Selection bias and mediation</h3>
+<p>Selection bias is collider-stratification bias induced by the study design itself, the act of selecting units into the sample. If showing up to the exam (<code>showed_up</code>) is caused by both <code>podcast</code> and other confounders, inherently conditioning on that variable (by only observing those who showed up) opens a collider path.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>podcast_dag3 <span class="ot">&lt;-</span> <span class="fu">dagify</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  podcast    <span class="sc">~</span> mood <span class="sc">+</span> humor <span class="sc">+</span> prepared,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  exam       <span class="sc">~</span> mood <span class="sc">+</span> prepared <span class="sc">+</span> showed_up,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  showed_up  <span class="sc">~</span> podcast <span class="sc">+</span> mood <span class="sc">+</span> prepared,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords     =</span> <span class="fu">time_ordered_coords</span>(</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(<span class="st">"prepared"</span>, <span class="st">"humor"</span>, <span class="st">"mood"</span>),</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">"podcast"</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>      <span class="st">"showed_up"</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">"exam"</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">exposure   =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome    =</span> <span class="st">"exam"</span>,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels     =</span> <span class="fu">c</span>(</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">podcast   =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">exam      =</span> <span class="st">"exam score"</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">mood      =</span> <span class="st">"mood"</span>,</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">humor     =</span> <span class="st">"humor"</span>,</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">prepared  =</span> <span class="st">"prepared"</span>,</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">showed_up =</span> <span class="st">"showed up"</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggdag</span>(podcast_dag3, <span class="at">use_labels =</span> <span class="st">"label"</span>, <span class="at">text =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Selection into sample as a collider-mediator"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-podcast-dag3" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-podcast-dag3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-podcast-dag3-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-podcast-dag3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.11: podcast_dag3: showed_up is both a collider and a mediator. Inherent stratification on this variable limits what causal effect we can estimate.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>When the total effect is unrecoverable (indirect path blocked at <code>showed_up</code>), the direct effect can sometimes still be estimated.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>podcast_dag3 <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adjust_for</span>(<span class="st">"showed_up"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggdag_adjustment_set</span>(<span class="at">effect =</span> <span class="st">"direct"</span>, <span class="at">text =</span> <span class="cn">FALSE</span>, <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Direct effect adjustment set after inherent conditioning on showed_up"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-podcast-dag3-direct" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-podcast-dag3-direct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-podcast-dag3-direct-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-podcast-dag3-direct-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.12: Switching the estimand from total to direct effect yields a valid adjustment set even after conditioning on showed_up.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="m-bias-and-butterfly-bias" class="level4">
+<h4 class="anchored" data-anchor-id="m-bias-and-butterfly-bias">M-bias and butterfly bias</h4>
+<p>M-bias occurs when a pre-exposure collider, <code>m</code>, is caused by two unmeasured variables <code>a</code> and <code>b</code> that separately cause the exposure and outcome. The path through <code>m</code> is closed by default; conditioning on <code>m</code> opens it.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">m_bias</span>() <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggdag</span>() <span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"M-bias structure"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-m-bias" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-m-bias-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-m-bias-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-m-bias-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.13: M-bias: m is a collider that predates exposure and outcome. The backdoor path x &lt;- a -&gt; m &lt;- b -&gt; y is closed; conditioning on m opens it.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Butterfly (bowtie) bias combines M-bias with confounding: <code>mood</code> is both a confounder (must be adjusted) and a collider (adjustment opens a path). When the unmeasured causes are absent from data, there is no clean solution. Empirical guidance: confounding bias tends to be larger than collider bias from M-structures, so adjusting is still the lesser evil.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">butterfly_bias</span>(<span class="at">x =</span> <span class="st">"podcast"</span>, <span class="at">y =</span> <span class="st">"exam"</span>, <span class="at">m =</span> <span class="st">"mood"</span>, <span class="at">a =</span> <span class="st">"u1"</span>, <span class="at">b =</span> <span class="st">"u2"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggdag</span>(<span class="at">text =</span> <span class="cn">FALSE</span>, <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Butterfly (bowtie) bias"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-butterfly" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-butterfly-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-butterfly-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-butterfly-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.14: Butterfly bias: mood is simultaneously a confounder and a collider. Controlling for mood blocks confounding but opens the collider path via u1 and u2.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="instrumental-variables-and-precision-variables" class="level3">
+<h3 class="anchored" data-anchor-id="instrumental-variables-and-precision-variables">4.3.3 Instrumental variables and precision variables</h3>
+<div class="cell">
+<div id="tbl-iv-precision" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-iv-precision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.4: Comparison of instrumental variables and precision variables.
+</figcaption>
+<div aria-describedby="tbl-iv-precision-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Property</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Instrumental variable (e.g., humor)</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Precision variable (e.g., grader_mood)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">Causes exposure?</td>
+<td style="text-align: left; width: 16em;">Yes</td>
+<td style="text-align: left; width: 16em;">No</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">Causes outcome?</td>
+<td style="text-align: left; width: 16em;">No (by assumption)</td>
+<td style="text-align: left; width: 16em;">Yes</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">On a backdoor path?</td>
+<td style="text-align: left; width: 16em;">No</td>
+<td style="text-align: left; width: 16em;">No</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">Include in adjustment model?</td>
+<td style="text-align: left; width: 16em;">Avoid unless suspected confounder</td>
+<td style="text-align: left; width: 16em;">Yes, always include when available</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">Effect on point estimate</td>
+<td style="text-align: left; width: 16em;">Usually negligible bias if wrongly added</td>
+<td style="text-align: left; width: 16em;">None</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold;">Effect on variance</td>
+<td style="text-align: left; width: 16em;">May slightly inflate SE</td>
+<td style="text-align: left; width: 16em;">Reduces variance, narrower CIs</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold;">Alternative use</td>
+<td style="text-align: left; width: 16em;">IV methods (Chapter 22)</td>
+<td style="text-align: left; width: 16em;">n/a</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>podcast_dag5 <span class="ot">&lt;-</span> <span class="fu">dagify</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  podcast     <span class="sc">~</span> mood <span class="sc">+</span> humor <span class="sc">+</span> prepared,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  exam        <span class="sc">~</span> mood <span class="sc">+</span> prepared <span class="sc">+</span> grader_mood,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords      =</span> <span class="fu">time_ordered_coords</span>(</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(<span class="st">"prepared"</span>, <span class="st">"humor"</span>, <span class="st">"mood"</span>),</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(<span class="st">"podcast"</span>, <span class="st">"grader_mood"</span>),</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>      <span class="st">"exam"</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">exposure    =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome     =</span> <span class="st">"exam"</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels      =</span> <span class="fu">c</span>(</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">podcast     =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">exam        =</span> <span class="st">"exam score"</span>,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">mood        =</span> <span class="st">"student</span><span class="sc">\n</span><span class="st">mood"</span>,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">humor       =</span> <span class="st">"humor"</span>,</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">prepared    =</span> <span class="st">"prepared"</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">grader_mood =</span> <span class="st">"grader</span><span class="sc">\n</span><span class="st">mood"</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a><span class="fu">ggdag</span>(podcast_dag5, <span class="at">use_labels =</span> <span class="st">"label"</span>, <span class="at">text =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"IV (humor) and precision variable (grader_mood) in podcast DAG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-podcast-dag5" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-podcast-dag5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-podcast-dag5-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-podcast-dag5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.15: humor is an IV (causes podcast, not exam); grader_mood is a precision variable (causes exam, not podcast).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="measurement-error-and-missingness" class="level3">
+<h3 class="anchored" data-anchor-id="measurement-error-and-missingness">4.3.4 Measurement error and missingness</h3>
+<p>Separating the <em>true</em> value of a variable from its <em>observed</em> value in the DAG exposes how measurement bias enters the causal estimate. In recall bias, the outcome influences the exposure measurement error, introducing a non-causal association between observed exposure and outcome.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>error_dag <span class="ot">&lt;-</span> <span class="fu">dagify</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  exposure_observed <span class="sc">~</span> exposure_real <span class="sc">+</span> exposure_error,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  outcome_observed  <span class="sc">~</span> outcome_real <span class="sc">+</span> outcome_error,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  outcome_real      <span class="sc">~</span> exposure_real,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  exposure_error    <span class="sc">~</span> outcome_real,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels            =</span> <span class="fu">c</span>(</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">exposure_real     =</span> <span class="st">"Exposure</span><span class="sc">\n</span><span class="st">(truth)"</span>,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">exposure_error    =</span> <span class="st">"Measurement</span><span class="sc">\n</span><span class="st">error (exposure)"</span>,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">exposure_observed =</span> <span class="st">"Exposure</span><span class="sc">\n</span><span class="st">(observed)"</span>,</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">outcome_real      =</span> <span class="st">"Outcome</span><span class="sc">\n</span><span class="st">(truth)"</span>,</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">outcome_error     =</span> <span class="st">"Measurement</span><span class="sc">\n</span><span class="st">error (outcome)"</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">outcome_observed  =</span> <span class="st">"Outcome</span><span class="sc">\n</span><span class="st">(observed)"</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">exposure =</span> <span class="st">"exposure_real"</span>,</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome  =</span> <span class="st">"outcome_real"</span>,</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords   =</span> <span class="fu">time_ordered_coords</span>()</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggdag</span>(error_dag, <span class="at">text =</span> <span class="cn">FALSE</span>, <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Recall bias: outcome influences memory of exposure"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-error-dag" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-error-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-error-dag-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-error-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.16: Measurement error DAG: outcome_real causes exposure_error, creating recall bias. The observed exposure is a biased proxy for the true exposure.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="recommendations-for-building-dags" class="level2">
+<h2 class="anchored" data-anchor-id="recommendations-for-building-dags">4.4 Recommendations for Building DAGs</h2>
+<section id="summary-table" class="level3">
+<h3 class="anchored" data-anchor-id="summary-table">Summary table</h3>
+<div class="cell">
+<div id="tbl-dag-advice" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dag-advice-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.5: Ten recommendations for building defensible DAGs.
+</figcaption>
+<div aria-describedby="tbl-dag-advice-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">#</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Recommendation</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right; width: 2em; font-weight: bold; background-color: rgba(240, 244, 255, 255) !important;">1</td>
+<td style="text-align: left; width: 14em; font-weight: bold; background-color: rgba(240, 244, 255, 255) !important;">Iterate early and often</td>
+<td style="text-align: left; width: 34em; background-color: rgba(240, 244, 255, 255) !important;">Build the DAG before analysis, ideally before data collection. Share with domain experts and iterate.</td>
+</tr>
+<tr class="even">
+<td style="text-align: right; width: 2em; font-weight: bold;">2</td>
+<td style="text-align: left; width: 14em; font-weight: bold;">Consider your question</td>
+<td style="text-align: left; width: 34em;">The causal structure varies by population and time. What is a confounder in one setting may be irrelevant in another.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right; width: 2em; font-weight: bold; background-color: rgba(240, 244, 255, 255) !important;">3</td>
+<td style="text-align: left; width: 14em; font-weight: bold; background-color: rgba(240, 244, 255, 255) !important;">Order nodes by time</td>
+<td style="text-align: left; width: 34em; background-color: rgba(240, 244, 255, 255) !important;">Time ordering clarifies assumptions (cause precedes effect) and makes complex DAGs easier to read.</td>
+</tr>
+<tr class="even">
+<td style="text-align: right; width: 2em; font-weight: bold;">4</td>
+<td style="text-align: left; width: 14em; font-weight: bold;">Consider the whole data collection process</td>
+<td style="text-align: left; width: 34em;">Found data inherits conditioning on the collection mechanism. Understand selection into your sample.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right; width: 2em; font-weight: bold;">5</td>
+<td style="text-align: left; width: 14em; font-weight: bold;">Include variables you don't have</td>
+<td style="text-align: left; width: 34em;">Mark unmeasured variables as latent; ggdag returns only adjustment sets feasible with your data.</td>
+</tr>
+<tr class="even">
+<td style="text-align: right; width: 2em; font-weight: bold; background-color: rgba(240, 244, 255, 255) !important;">6</td>
+<td style="text-align: left; width: 14em; font-weight: bold; background-color: rgba(240, 244, 255, 255) !important;">Saturate your DAG, then prune</td>
+<td style="text-align: left; width: 34em; background-color: rgba(240, 244, 255, 255) !important;">Default to including arrows; not-including is the stronger assumption. Prune only implausible arrows.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right; width: 2em; font-weight: bold;">7</td>
+<td style="text-align: left; width: 14em; font-weight: bold;">Include instruments and precision variables</td>
+<td style="text-align: left; width: 34em;">Neither type changes the adjustment set, but both inform modeling decisions and can flag IV opportunities.</td>
+</tr>
+<tr class="even">
+<td style="text-align: right; width: 2em; font-weight: bold;">8</td>
+<td style="text-align: left; width: 14em; font-weight: bold;">Focus on causal structure first, then measurement bias</td>
+<td style="text-align: left; width: 34em;">Start with a perfectly-measured DAG; then overlay measurement error as a sensitivity exercise.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right; width: 2em; font-weight: bold; background-color: rgba(240, 244, 255, 255) !important;">9</td>
+<td style="text-align: left; width: 14em; font-weight: bold; background-color: rgba(240, 244, 255, 255) !important;">Pick adjustment sets most likely to succeed</td>
+<td style="text-align: left; width: 34em; background-color: rgba(240, 244, 255, 255) !important;">When multiple valid sets exist, prefer the one with better-measured, better-modeled variables.</td>
+</tr>
+<tr class="even">
+<td style="text-align: right; width: 2em; font-weight: bold;">10</td>
+<td style="text-align: left; width: 14em; font-weight: bold;">Use robustness checks</td>
+<td style="text-align: left; width: 34em;">Negative controls, DAG-data consistency checks, and alternate adjustment sets all stress-test your assumptions.</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="saturate-then-prune-worked-example" class="level3">
+<h3 class="anchored" data-anchor-id="saturate-then-prune-worked-example">Saturate then prune (worked example)</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>podcast_dag_sat <span class="ot">&lt;-</span> <span class="fu">dagify</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  podcast  <span class="sc">~</span> mood <span class="sc">+</span> humor <span class="sc">+</span> prepared,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  exam     <span class="sc">~</span> mood <span class="sc">+</span> prepared <span class="sc">+</span> humor,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  prepared <span class="sc">~</span> humor,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  mood     <span class="sc">~</span> humor,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords   =</span> <span class="fu">time_ordered_coords</span>(</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(<span class="st">"humor"</span>, <span class="fu">c</span>(<span class="st">"prepared"</span>, <span class="st">"mood"</span>), <span class="st">"podcast"</span>, <span class="st">"exam"</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">exposure =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome  =</span> <span class="st">"exam"</span>,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels   =</span> <span class="fu">c</span>(</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">podcast  =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">exam     =</span> <span class="st">"exam score"</span>,</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">mood     =</span> <span class="st">"mood"</span>,</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">humor    =</span> <span class="st">"humor"</span>,</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">prepared =</span> <span class="st">"prepared"</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>curvatures      <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">8</span>)</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>curvatures[<span class="dv">1</span>]   <span class="ot">&lt;-</span> <span class="fl">0.25</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>podcast_dag_sat <span class="sc">|&gt;</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy_dagitty</span>() <span class="sc">|&gt;</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(x, y, <span class="at">xend =</span> xend, <span class="at">yend =</span> yend, <span class="at">label =</span> label)) <span class="sc">+</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_point</span>(<span class="at">colour =</span> <span class="st">"#2c7bb6"</span>, <span class="at">size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_edges_arc</span>(<span class="at">curvature =</span> curvatures) <span class="sc">+</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_label_repel</span>(<span class="fu">aes</span>(<span class="at">label =</span> label), <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Saturated podcast DAG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-podcast-sat" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-podcast-sat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-podcast-sat-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-podcast-sat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.17: Fully saturated version of podcast_dag: every variable has arrows to all later variables.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>podcast_dag_pruned <span class="ot">&lt;-</span> <span class="fu">dagify</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  podcast  <span class="sc">~</span> mood <span class="sc">+</span> humor <span class="sc">+</span> prepared,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  exam     <span class="sc">~</span> mood <span class="sc">+</span> prepared,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  mood     <span class="sc">~</span> humor,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords   =</span> <span class="fu">time_ordered_coords</span>(</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(<span class="st">"humor"</span>, <span class="fu">c</span>(<span class="st">"prepared"</span>, <span class="st">"mood"</span>), <span class="st">"podcast"</span>, <span class="st">"exam"</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">exposure =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome  =</span> <span class="st">"exam"</span>,</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels   =</span> <span class="fu">c</span>(</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">podcast  =</span> <span class="st">"podcast"</span>,</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">exam     =</span> <span class="st">"exam score"</span>,</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">mood     =</span> <span class="st">"mood"</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">humor    =</span> <span class="st">"humor"</span>,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">prepared =</span> <span class="st">"prepared"</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggdag</span>(podcast_dag_pruned, <span class="at">text =</span> <span class="cn">FALSE</span>, <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Pruned podcast DAG, implausible arrows removed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-podcast-pruned" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-podcast-pruned-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-podcast-pruned-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-podcast-pruned-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.18: Pruned DAG: implausible arrows (humor -&gt; prepared and humor -&gt; exam, since grading is blinded) removed.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Both the saturated and pruned DAGs share the same minimal adjustment set (<code>mood + prepared</code>), showing that the pruning decision doesn’t change what must be adjusted here.</p>
+</section>
+<section id="feedback-loops-are-feedforward-loops" class="level3">
+<h3 class="anchored" data-anchor-id="feedback-loops-are-feedforward-loops">Feedback loops are feedforward loops</h3>
+<p>Apparent feedback loops are actually variables co-evolving through time. Expressing this correctly as a time-unrolled DAG avoids the cyclic violation.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dagify</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  global_temp_2000 <span class="sc">~</span> ac_use_1990 <span class="sc">+</span> global_temp_1990,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  ac_use_2000      <span class="sc">~</span> ac_use_1990 <span class="sc">+</span> global_temp_1990,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  global_temp_2010 <span class="sc">~</span> ac_use_2000 <span class="sc">+</span> global_temp_2000,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  ac_use_2010      <span class="sc">~</span> ac_use_2000 <span class="sc">+</span> global_temp_2000,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  global_temp_2020 <span class="sc">~</span> ac_use_2010 <span class="sc">+</span> global_temp_2010,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  ac_use_2020      <span class="sc">~</span> ac_use_2010 <span class="sc">+</span> global_temp_2010,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords           =</span> <span class="fu">time_ordered_coords</span>(),</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels           =</span> <span class="fu">c</span>(</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">ac_use_1990      =</span> <span class="st">"A/C use</span><span class="sc">\n</span><span class="st">(1990)"</span>,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">global_temp_1990 =</span> <span class="st">"Temp</span><span class="sc">\n</span><span class="st">(1990)"</span>,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">ac_use_2000      =</span> <span class="st">"A/C use</span><span class="sc">\n</span><span class="st">(2000)"</span>,</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">global_temp_2000 =</span> <span class="st">"Temp</span><span class="sc">\n</span><span class="st">(2000)"</span>,</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">ac_use_2010      =</span> <span class="st">"A/C use</span><span class="sc">\n</span><span class="st">(2010)"</span>,</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">global_temp_2010 =</span> <span class="st">"Temp</span><span class="sc">\n</span><span class="st">(2010)"</span>,</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">ac_use_2020      =</span> <span class="st">"A/C use</span><span class="sc">\n</span><span class="st">(2020)"</span>,</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">global_temp_2020 =</span> <span class="st">"Temp</span><span class="sc">\n</span><span class="st">(2020)"</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggdag</span>(<span class="at">text =</span> <span class="cn">FALSE</span>, <span class="at">use_labels =</span> <span class="st">"label"</span>) <span class="sc">+</span></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Feedback loop unrolled as a time-ordered feedforward DAG"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-feedforward" class="quarto-figure quarto-figure-center quarto-float anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-feedforward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch04_files/figure-html/fig-feedforward-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-feedforward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.19: A/C use and global temperature co-evolve over time. The cyclic mental model unfolds into a feedforward DAG.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="dag-properties-in-applied-health-research" class="level2">
+<h2 class="anchored" data-anchor-id="dag-properties-in-applied-health-research">DAG properties in applied health research</h2>
+<p>The table below summarises empirical properties of DAGs used in 144 applied health research papers (Tennant et al.&nbsp;2020).</p>
+<div class="cell">
+<div id="tbl-dag-properties" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dag-properties-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.6: Empirical properties of 144 DAGs in applied health research (Tennant et al.&nbsp;2020). Most DAGs were only ~46% saturated; fewer than a third reported their estimand.
+</figcaption>
+<div aria-describedby="tbl-dag-properties-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Characteristic</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">N = 144</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd" data-grouplength="6">
+<td colspan="2" style="border-bottom: 1px solid"><strong>DAG properties</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em; width: 20em;" data-indentlevel="1">Number of nodes</td>
+<td style="text-align: left; width: 14em;">12 (IQR: 9-16)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em; width: 20em;" data-indentlevel="1">Number of arcs</td>
+<td style="text-align: left; width: 14em;">29 (IQR: 19-42)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em; width: 20em;" data-indentlevel="1">Node-to-arc ratio</td>
+<td style="text-align: left; width: 14em;">2.30 (IQR: 1.75-3.00)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em; width: 20em;" data-indentlevel="1">Saturation proportion</td>
+<td style="text-align: left; width: 14em;">0.46 (IQR: 0.31-0.67)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em; width: 20em; font-weight: bold; background-color: rgba(255, 243, 205, 255) !important;" data-indentlevel="1">Fully saturated, Yes</td>
+<td style="text-align: left; width: 14em; font-weight: bold; background-color: rgba(255, 243, 205, 255) !important;">4 (3%)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em; width: 20em;" data-indentlevel="1">Fully saturated, No</td>
+<td style="text-align: left; width: 14em;">140 (97%)</td>
+</tr>
+<tr class="even" data-grouplength="4">
+<td colspan="2" style="border-bottom: 1px solid"><strong>Reporting</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em; width: 20em; font-weight: bold; background-color: rgba(255, 243, 205, 255) !important;" data-indentlevel="1">Reported estimand, Yes</td>
+<td style="text-align: left; width: 14em; font-weight: bold; background-color: rgba(255, 243, 205, 255) !important;">40 (28%)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em; width: 20em;" data-indentlevel="1">Reported estimand, No</td>
+<td style="text-align: left; width: 14em;">104 (72%)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em; width: 20em; font-weight: bold; background-color: rgba(255, 243, 205, 255) !important;" data-indentlevel="1">Reported adjustment set, Yes</td>
+<td style="text-align: left; width: 14em; font-weight: bold; background-color: rgba(255, 243, 205, 255) !important;">80 (56%)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em; width: 20em;" data-indentlevel="1">Reported adjustment set, No</td>
+<td style="text-align: left; width: 14em;">64 (44%)</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<hr>
+</section>
+<section id="key-concepts-glossary" class="level2">
+<h2 class="anchored" data-anchor-id="key-concepts-glossary">Key concepts glossary</h2>
+<div class="cell">
+<div id="tbl-glossary" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-glossary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.7: Key terms from Chapter 4.
+</figcaption>
+<div aria-describedby="tbl-glossary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Term</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">DAG</td>
+<td style="text-align: left; width: 36em;">Directed Acyclic Graph, a causal diagram with directed arrows and no cycles</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 12em; font-weight: bold;">SCM</td>
+<td style="text-align: left; width: 36em;">Structural Causal Model, the class of non-parametric models that DAGs belong to</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Node / Edge</td>
+<td style="text-align: left; width: 36em;">Node: a variable. Edge: a directed arrow encoding a causal relationship</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 12em; font-weight: bold;">Fork</td>
+<td style="text-align: left; width: 36em;">q -&gt; x and q -&gt; y: shared common cause; open path; induces confounding</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Chain</td>
+<td style="text-align: left; width: 36em;">x -&gt; q -&gt; y: effect passes through mediator; open path; blocks causal flow if adjusted</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 12em; font-weight: bold;">Collider</td>
+<td style="text-align: left; width: 36em;">x -&gt; q &lt;- y: shared descendant; closed path; conditioning on it opens a biasing path</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Open path</td>
+<td style="text-align: left; width: 36em;">A path that transmits statistical association between exposure and outcome</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 12em; font-weight: bold;">Closed path</td>
+<td style="text-align: left; width: 36em;">A path that does not transmit association (e.g., at a collider)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Backdoor path</td>
+<td style="text-align: left; width: 36em;">Any open, non-causal path from exposure to outcome that must be blocked</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 12em; font-weight: bold;">Adjustment set</td>
+<td style="text-align: left; width: 36em;">A set of variables that, when adjusted, blocks all backdoor paths</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Collider-stratification bias</td>
+<td style="text-align: left; width: 36em;">Bias introduced by conditioning on a collider (also called selection bias)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 12em; font-weight: bold;">Instrumental variable</td>
+<td style="text-align: left; width: 36em;">A cause of exposure only, not outcome; useful for IV estimation methods</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Precision variable</td>
+<td style="text-align: left; width: 36em;">A cause of outcome only, not exposure; reduces variance when included in model</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 12em; font-weight: bold;">Sharp null</td>
+<td style="text-align: left; width: 36em;">No unit has an individual causal effect; justifies removing an arrow</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Proxy confounder</td>
+<td style="text-align: left; width: 36em;">A measured variable correlated with an unmeasured confounder; reduces but rarely eliminates confounding</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<hr>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Chapter connections
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li><strong>Chapter 10</strong> covers estimands in depth (what are you actually trying to estimate?).<br>
+</li>
+<li><strong>Chapter 14</strong> covers interaction and effect modification.<br>
+</li>
+<li><strong>Chapter 15</strong> covers measurement error and missingness.<br>
+</li>
+<li><strong>Chapter 16</strong> covers sensitivity analysis, including robustness checks.<br>
+</li>
+<li><strong>Chapter 17</strong> covers causal mediation analysis.<br>
+</li>
+<li><strong>Chapter 18</strong> covers time-varying confounding and feedforward relationships.<br>
+</li>
+<li><strong>Chapter 22</strong> covers instrumental variable methods.<br>
+</li>
+</ul>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/ch03.html" class="pagination-link" aria-label="Chapter3: Potential Outcomes and Counterfactuals">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Chapter3: Potential Outcomes and Counterfactuals</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/ch05.html" class="pagination-link" aria-label="Causal Inference is not (just) a statistical problem">
+        <span class="nav-page-text"><span class="chapter-title">Causal Inference is not (just) a statistical problem</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/malcolmbarrett/causal-inference-in-r/blob/main/chapters/ch04.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/malcolmbarrett/causal-inference-in-r/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

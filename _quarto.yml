@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 book:
-  title: "Causal Inference in R — Chapter Summaries"
+  title: "Causal Inference in R - Chapter Summaries"
   author: "Based on Barrett, D'Agostino McGowan & Gerber"
   date: today
   repo-url: https://github.com/malcolmbarrett/causal-inference-in-r

@@ -14,6 +14,7 @@ n      <- 10000
 ACCENT <- "steelblue"
 INK    <- "grey20"
 ```
+
 # From question to answer: Stratification and outcome models
 
 ## Overview
@@ -23,6 +24,7 @@ The first five chapters built the scaffolding: potential outcomes, counterfactua
 ## 6.1 Causal inference with `group_by()` and `summarise()`
 
 ### Single binary confounder
+
 
 The running example is a software company trying to measure whether update frequency (weekly vs. daily) affects customer satisfaction, scored as a standardised value with population mean 0 and standard deviation 1. The exposure is not randomised. Customer type (free or premium) causes both update frequency and satisfaction, opening a backdoor path. The DAG has no arrow from updates to satisfaction because the true effect is zero.
 
@@ -34,6 +36,7 @@ coords1 <- list(
   x = c(customer_type = 1, updates = 2, satisfaction = 3),
   y = c(customer_type = 0, updates = 0, satisfaction = 0)
 )
+
 
 dagify(
   satisfaction ~ customer_type,
@@ -60,7 +63,8 @@ The simulation sets the true average treatment effect to zero. Each unit's poten
 
 ```{r}
 #| label: sim1
-
+#| echo: true
+#| 
 satisfaction1 <- tibble(
   customer_type = rbinom(n, 1, 0.5),
   p_exposure = case_when(
