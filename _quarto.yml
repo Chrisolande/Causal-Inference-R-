@@ -1,0 +1,36 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Causal Inference in R — Chapter Summaries"
+  author: "Based on Barrett, D'Agostino McGowan & Gerber"
+  date: today
+  repo-url: https://github.com/malcolmbarrett/causal-inference-in-r
+  repo-actions: [source, issue]
+  chapters:
+    - index.qmd
+    - chapters/ch01.qmd
+    - chapters/ch02.qmd
+    - chapters/ch03.qmd
+    - chapters/ch04.qmd
+    - chapters/ch05.qmd
+    - chapters/ch06.qmd
+
+format:
+  html:
+    brand: _brand.yml
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: false
+    code-fold: true
+    code-summary: "Show code"
+    fig-width: 8
+    fig-height: 5
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false
+  message: false

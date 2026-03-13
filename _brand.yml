@@ -1,0 +1,124 @@
+meta:
+  name:
+    short: CI in R
+    full: Causal Inference in R - Chapter Summaries
+  link:
+    home: https://www.r-causal.org/
+    github: https://github.com/malcolmbarrett/causal-inference-in-r
+
+color:
+  palette:
+    causal-blue:    "#2e6da4"
+    causal-teal:    "#3b9e9e"
+    causal-navy:    "#1a3a5c"   
+    causal-slate:   "#3d4c5e"  
+
+    off-white:      "#f7f8fa" 
+    light-gray:     "#e8edf3"
+    mid-gray:       "#8a9bb0"
+    white:          "#ffffff"
+
+    causal-amber:   "#d97b2b"
+    causal-green:   "#3a7d52"
+    causal-red:     "#b83535"
+    causal-violet:  "#6350a0"
+
+    blue:    causal-blue
+    teal:    causal-teal
+    green:   causal-green
+    orange:  causal-amber
+    red:     causal-red
+    purple:  causal-violet
+
+  foreground:  causal-slate
+  background:  off-white
+  primary:     causal-blue
+  secondary:   mid-gray
+  tertiary:    causal-teal
+  success:     causal-green
+  info:        causal-violet
+  warning:     causal-amber
+  danger:      causal-red
+  light:       light-gray
+  dark:        causal-navy
+
+typography:
+  fonts:
+    - family: Source Serif 4
+      source: google
+      weight: [400, 600]
+      style: [normal, italic]
+
+    - family: DM Sans
+      source: google
+      weight: [400, 500, 600, 700]
+      style: [normal, italic]
+
+    - family: JetBrains Mono
+      source: google
+      weight: [400, 500]
+      style: [normal, italic]
+
+  base:
+    family: Source Serif 4
+    size: 16px
+    line-height: 1.65
+    weight: 400
+
+  headings:
+    family: DM Sans
+    weight: 600
+    line-height: 1.25
+    color: causal-navy
+
+  monospace:
+    family: JetBrains Mono
+    size: 0.88em
+
+  monospace-inline:
+    color: causal-violet
+    background-color: light-gray
+
+  monospace-block:
+    color: causal-slate
+    background-color: light-gray
+    line-height: 1.5
+
+  link:
+    color: causal-blue
+    weight: 400
+    decoration: underline
+
+defaults:
+  bootstrap:
+    defaults:
+      border-radius: "0.35rem"
+      table-cell-padding-y: "0.35rem"
+      table-cell-padding-x: "0.6rem"
+      navbar-bg: $causal-navy
+      navbar-dark-color: rgba(255,255,255,0.85)
+      navbar-dark-hover-color: "#ffffff"
+    rules: |
+      h3 {
+        border-left: 3px solid #3b9e9e;
+        padding-left: 0.55em;
+        margin-top: 2rem;
+      }
+      strong + em,
+      .tag {
+        background-color: #e8edf3;
+        border-radius: 3px;
+        padding: 1px 6px;
+        font-size: 0.78em;
+        font-style: normal;
+        color: #3d4c5e;
+      }
+      .table-striped > tbody > tr:nth-of-type(odd) > * {
+        background-color: #f0f4f8;
+      }
+      .callout-note {
+        border-left-color: #3b9e9e !important;
+      }
+      .callout-important {
+        border-left-color: #d97b2b !important;
+      }

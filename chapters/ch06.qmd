@@ -1,6 +1,6 @@
 ```{r}
 #| label: setup
-#| echo: false
+#| include: false
 
 library(tidyverse)
 library(ggdag)
@@ -14,6 +14,7 @@ n      <- 10000
 ACCENT <- "steelblue"
 INK    <- "grey20"
 ```
+# From question to answer: Stratification and outcome models
 
 ## Overview
 
