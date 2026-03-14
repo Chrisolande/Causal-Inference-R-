@@ -1,0 +1,828 @@
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(lubridate)
+library(knitr)
+library(kableExtra)
+library(ggdag)
+library(ggokabeito)
+library(touringplans)
+library(halfmoon)
+library(hms)
+```
+
+# Preparing Data to answer Causal questions
+
+## Overview
+
+Data preparation for causal inference looks familiar on the surface: you clean things up, do some EDA, maybe merge a couple of datasets. What makes it different is that every decision you take during prep needs to connect back to the causal question and the target trial you are trying to emulate. This chapter walks through that process using wait time data from Disney World.
+
+The chapter covers six areas: getting to know the data, framing the causal question, linking protocol steps to tidyverse code, joining multiple sources, building a descriptive table, flagging missing data, and checking the positivity assumption.
+
+---
+
+## 7.1 The Data
+
+The `touringplans` package contains attraction wait time data from Disney and Universal theme parks. There are 14 attractions in the package.
+
+```{r}
+#| label: tbl-attractions
+#| tbl-cap: "Attractions available in the touringplans package."
+
+attractions_metadata |>
+  kbl(
+    col.names = c(
+      "Dataset", "Name", "Short Name", "Park",
+      "Land", "Opened", "Duration (min)", "Avg Wait / 100"
+    ),
+    digits = 1
+  ) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+Alongside the attraction data, `parks_metadata_raw` has 181 columns of daily park-level information: ticket season, historic temperature, special events, and more.
+
+```{r}
+#| label: tbl-emh-by-year
+#| tbl-cap: "Days with and without Extra Magic Hours in the morning (mkemhmorn), by year."
+
+parks_metadata_raw |>
+  count(year, mkemhmorn) |>
+  pivot_wider(names_from = mkemhmorn, values_from = n, names_prefix = "emh_") |>
+  rename(Year = year, `No EMH` = emh_0, `EMH Morning` = emh_1) |>
+  kbl() |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+2020 and 2021 are truncated due to COVID-19 park closures.
+
+```{r}
+#| label: tbl-days-per-year
+#| tbl-cap: "Total observation days per year in the parks metadata."
+
+parks_metadata_raw |>
+  count(year, mkemhmorn) |>
+  summarize(days = sum(n), .by = year) |>
+  kbl(col.names = c("Year", "Days Observed")) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+The Seven Dwarfs Mine Train data has over 320,000 rows, with one row per wait time record (either posted or actual, with the other as `NA`).
+
+```{r}
+#| label: tbl-wait-range
+#| tbl-cap: "Range of dates and wait times in the Seven Dwarfs Mine Train dataset."
+
+seven_dwarfs_train |>
+  reframe(
+    across(
+      c(park_date, starts_with("wait_minutes")),
+      \(.x) range(.x, na.rm = TRUE)
+    )
+  ) |>
+  mutate(bound = c("Min", "Max")) |>
+  relocate(bound) |>
+  kbl(
+    col.names = c("Bound", "Park Date", "Actual Wait (min)", "Posted Wait (min)")
+  ) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+The minimum actual wait time of -92,918 minutes is an obvious data error. Strip it before doing anything else.
+
+```{r}
+seven_dwarfs_train <- seven_dwarfs_train |>
+  filter(wait_minutes_actual >= 0 | is.na(wait_minutes_actual))
+```
+
+Posted wait times are always multiples of 5, which is a useful sanity check:
+
+```{r}
+#| label: tbl-posted-unique
+#| tbl-cap: "Unique posted wait time values (minutes). All are multiples of 5."
+
+seven_dwarfs_train |>
+  pull(wait_minutes_posted) |>
+  unique() |>
+  sort() |>
+  matrix(nrow = 5) |>
+  as.data.frame() |>
+  kbl(col.names = NULL) |>
+  kable_styling(
+    bootstrap_options = c("condensed"),
+    full_width = FALSE
+  )
+```
+
+The two wait time distributions look quite different. Actual times are shorter on average and roughly right-skewed; posted times are discretized to 5-minute increments and slightly heavier in the right tail.
+
+```{r}
+#| label: fig-wait-dist
+#| fig-cap: "Distribution of posted and actual wait times for the Seven Dwarfs Mine Train. Posted times are rounded to 5-minute increments, while actual times are shorter on average and less discretized."
+#| fig-alt: "Two density plots side by side showing posted and actual wait time distributions."
+
+seven_dwarfs_train |>
+  pivot_longer(
+    starts_with("wait_minutes"),
+    names_to = "wait_type",
+    values_to = "wait_minutes"
+  ) |>
+  mutate(
+    wait_type = case_when(
+      wait_type == "wait_minutes_actual" ~ "Actual",
+      wait_type == "wait_minutes_posted" ~ "Posted"
+    )
+  ) |>
+  ggplot(aes(wait_minutes, fill = wait_type)) +
+  geom_density(color = NA, alpha = 0.85) +
+  facet_wrap(~wait_type, scales = "free_y") +
+  scale_fill_okabe_ito() +
+  labs(
+    x = "Wait time (minutes)",
+    y = "Density",
+    fill = "Wait type",
+    title = "Posted vs. Actual Wait Times",
+    subtitle = "Seven Dwarfs Mine Train, all years"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "none")
+```
+
+---
+
+## 7.2 The Causal Question
+
+The causal question driving the next several chapters is:
+
+> **Does having Extra Magic Hours in the morning at Magic Kingdom causally increase the average posted wait time for the Seven Dwarfs Mine Train between 9 AM and 10 AM on the same day in 2018?**
+
+The exposure is a binary day-level indicator: did Magic Kingdom run Extra Magic Hours in the morning (yes or no)? The outcome is the average posted wait time during the 9--10 AM window.
+
+### DAG
+
+The proposed DAG encodes the belief that Extra Magic Morning status and average wait times share three common causes: ticket season, park close time, and historic high temperature. Each of these opens a backdoor path that needs to be blocked.
+
+```{r}
+#| label: fig-dag
+#| fig-cap: "Proposed DAG for the effect of Extra Magic Hours in the morning on average Seven Dwarfs Mine Train wait times between 9 and 10 AM. Ticket season, park close time, and historic high temperature are confounders."
+#| fig-alt: "DAG with five nodes: Extra Magic Morning, Average wait, Ticket Season, Time park closed, and Historic high temperature."
+
+coord_dag <- list(
+  x = c(Season = 0, close = 0, weather = -1, x = 1, y = 2),
+  y = c(Season = -1, close = 1, weather = 0, x = 0, y = 0)
+)
+
+labels <- c(
+  x = "Extra Magic\nMorning",
+  y = "Average wait",
+  Season = "Ticket Season",
+  weather = "Historic high\ntemperature",
+  close = "Time park\nclosed"
+)
+
+dagify(
+  y ~ x + close + Season + weather,
+  x ~ weather + close + Season,
+  coords = coord_dag,
+  labels = labels,
+  exposure = "x",
+  outcome = "y"
+) |>
+  tidy_dagitty() |>
+  node_status() |>
+  ggplot(aes(x, y, xend = xend, yend = yend, color = status)) +
+  geom_dag_edges_arc(curvature = c(rep(0, 5), 0.3)) +
+  geom_dag_point() +
+  geom_dag_label_repel(aes(label = label), seed = 1630) +
+  scale_color_okabe_ito(na.value = "grey90") +
+  theme_dag() +
+  theme(legend.position = "none") +
+  coord_cartesian(clip = "off")
+```
+
+---
+
+## 7.3 From Protocol to Code
+
+The target trial protocol maps cleanly onto tidyverse operations. The table below shows that correspondence.
+
+```{r}
+#| label: tbl-protocol-code
+#| tbl-cap: "Mapping target trial protocol elements to tidyverse functions."
+
+tibble(
+  `Protocol Element` = c(
+    "Eligibility criteria",
+    "Exposure definition",
+    "Assignment procedures",
+    "Follow-up period",
+    "Outcome definition",
+    "Analysis plan"
+  ),
+  `tidyverse Function(s)` = c(
+    "`filter()`",
+    "`mutate()`",
+    "`mutate()`, `select()`",
+    "`mutate()`, `pivot_longer()`, `pivot_wider()`",
+    "`mutate()`",
+    "`select()`, `mutate()`, `*_join()`"
+  )
+) |>
+  kbl(escape = FALSE) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+The full target trial protocol for this study looks like this:
+
+```{r}
+#| label: tbl-target-trial
+#| tbl-cap: "Target trial protocol for the effect of Extra Magic Morning on Seven Dwarfs Mine Train wait times, and the corresponding observational emulation."
+
+tibble(
+  `Protocol Step` = c(
+    "Eligibility criteria",
+    "Exposure definition",
+    "Assignment procedures",
+    "Follow-up period",
+    "Outcome definition",
+    "Causal contrast",
+    "Analysis plan"
+  ),
+  `Target Trial` = c(
+    "Days from 2018.",
+    "Exposed: Magic Kingdom had Extra Magic Hours in the morning.",
+    "Random assignment, 50% probability, non-blinded.",
+    "Park open until 10 AM on the same day.",
+    "Average posted wait time for Seven Dwarfs Mine Train, 9--10 AM.",
+    "Average Treatment Effect (ATE).",
+    "ATE via IPW, weighted for temperature, ticket season, close time."
+  ),
+  `Observational Emulation` = c(
+    "Same.",
+    "Same.",
+    "Days assigned per observed data. Randomization emulated via confounding adjustment.",
+    "Same.",
+    "Same.",
+    "Same.",
+    "Same. Confounders from DAG in Figure 1."
+  )
+) |>
+  kbl() |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = TRUE
+  ) |>
+  column_spec(1, bold = TRUE, width = "12em") |>
+  column_spec(2:3, width = "18em")
+```
+
+### Building the outcome dataset
+
+The outcome is the average posted wait time in the 9 AM hour, filtered to 2018.
+
+```{r}
+#| label: build-outcome
+
+seven_dwarfs_9 <- seven_dwarfs_train |>
+  filter(year(park_date) == 2018) |>
+  mutate(hour = hour(wait_datetime)) |>
+  summarize(
+    across(
+      c(wait_minutes_posted, wait_minutes_actual),
+      \(.x) mean(.x, na.rm = TRUE),
+      .names = "{.col}_avg"
+    ),
+    .by = c(park_date, hour)
+  ) |>
+  mutate(
+    across(
+      c(wait_minutes_posted_avg, wait_minutes_actual_avg),
+      \(.x) if_else(is.nan(.x), NA, .x)
+    )
+  ) |>
+  filter(hour == 9)
+```
+
+```{r}
+#| label: tbl-outcome-head
+#| tbl-cap: "First 10 rows of the outcome dataset: average posted and actual wait times for the 9 AM hour in 2018."
+
+seven_dwarfs_9 |>
+  head(10) |>
+  kbl(
+    col.names = c("Date", "Hour", "Avg Posted Wait (min)", "Avg Actual Wait (min)"),
+    digits = 1
+  ) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+---
+
+## 7.4 Joining Multiple Data Sources
+
+The exposure and confounders are in `parks_metadata_raw`. Clean and filter to 2018 first, then join.
+
+```{r}
+#| label: build-parks-metadata
+
+parks_metadata <- parks_metadata_raw |>
+  select(
+    park_date          = date,
+    park_extra_magic_morning = mkemhmorn,
+    park_ticket_season = wdw_ticket_season,
+    park_temperature_high    = wdwmaxtemp,
+    park_close         = mkclose
+  ) |>
+  filter(year(park_date) == 2018)
+```
+
+Variable names follow the "Column Names as Contracts" convention (Riederer 2020): variables from park-level metadata are prefixed with `park_`, wait time variables with `wait_`.
+
+### Extra Magic Mornings by month
+
+About 12 to 16% of days had Extra Magic Mornings in most months. December stands out at 42%.
+
+```{r}
+#| label: tbl-emh-by-month
+#| tbl-cap: "Proportion of 2018 days with Extra Magic Hours in the morning, by calendar month."
+
+parks_metadata |>
+  mutate(month_num = month(park_date)) |>
+  summarize(
+    prop_emh = sum(park_extra_magic_morning) / n(),
+    .by = month_num
+  ) |>
+  arrange(month_num) |>
+  mutate(month_label = month(month_num, label = TRUE, abbr = FALSE)) |>
+  select(Month = month_label, `Proportion EMH` = prop_emh) |>
+  kbl(digits = 3) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+### Confounders
+
+Not every ticket season type appears in every month:
+
+```{r}
+#| label: helper-count-by-month
+
+count_by_month <- function(data, .var) {
+  data |>
+    mutate(month = month(park_date, label = TRUE, abbr = TRUE)) |>
+    count(month, {{ .var }}) |>
+    complete(month, {{ .var }}, fill = list(n = 0))
+}
+
+ticket_season_by_month <- parks_metadata |>
+  count_by_month(park_ticket_season)
+```
+
+```{r}
+#| label: tbl-ticket-season-sparse
+#| tbl-cap: "Months with zero or very few days of a particular ticket season. Peak tickets were absent in August and September; value tickets were absent in June, July, and December."
+
+ticket_season_by_month |>
+  filter(n <= 4) |>
+  arrange(n, park_ticket_season) |>
+  kbl(col.names = c("Month", "Ticket Season", "Days")) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+```{r}
+#| label: fig-ticket-season
+#| fig-cap: "Proportion of days by ticket season across 2018. Regular season dominates the summer months; peak season clusters around school holidays."
+#| fig-alt: "Stacked bar chart showing ticket season proportions by month."
+
+ticket_season_by_month |>
+  ggplot(aes(month, n, fill = park_ticket_season)) +
+  geom_col(position = "fill", alpha = 0.85) +
+  scale_fill_okabe_ito() +
+  labs(
+    y = "Proportion of days",
+    x = NULL,
+    fill = "Ticket season",
+    title = "Ticket Season by Month (2018)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(panel.grid.major.x = element_blank())
+```
+
+Close times show more variety than you might expect:
+
+```{r}
+#| label: tbl-close-times
+#| tbl-cap: "Count of 2018 days by Magic Kingdom park close time."
+
+parks_metadata |>
+  count(park_close, sort = TRUE) |>
+  kbl(col.names = c("Close Time", "Days")) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+```{r}
+#| label: fig-close-time
+#| fig-cap: "Proportion of days by close time, across months. Earlier close times concentrate in late fall and winter."
+#| fig-alt: "Stacked bar chart of park close time by month."
+
+parks_metadata |>
+  count_by_month(park_close) |>
+  ggplot(aes(month, n, fill = ordered(park_close))) +
+  geom_col(position = "fill", alpha = 0.85) +
+  scale_fill_okabe_ito() +
+  labs(
+    y = "Proportion of days",
+    x = NULL,
+    fill = "Close time",
+    title = "Park Close Time by Month (2018)"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(panel.grid.major.x = element_blank())
+```
+
+```{r}
+#| label: fig-temperature
+#| fig-cap: "Historic high temperature at Walt Disney World by month. The park is in Florida, so temperatures stay relatively warm year-round, but summers get properly hot."
+#| fig-alt: "Jitter plot of historic high temperature by month."
+
+parks_metadata |>
+  mutate(month = month(park_date, label = TRUE, abbr = TRUE)) |>
+  ggplot(aes(month, park_temperature_high)) +
+  geom_jitter(height = 0, width = 0.15, alpha = 0.5, color = "#0072B2") +
+  labs(
+    y = "Historic high temperature (F)",
+    x = NULL,
+    title = "Daily High Temperature by Month (2018)"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+### Joining the datasets
+
+Three May dates are missing from `seven_dwarfs_9` (no 9 AM records in the raw data):
+
+```{r}
+#| label: tbl-anti-join
+#| tbl-cap: "Days in parks metadata with no matching 9 AM wait time records. Three consecutive days in May 2018 are absent."
+
+parks_metadata |>
+  anti_join(seven_dwarfs_9, by = "park_date") |>
+  mutate(park_close = as.character(park_close)) |>
+  kbl() |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+Left-join on `park_date` to build the analytic dataset:
+
+```{r}
+#| label: build-analytic
+
+seven_dwarfs_9 <- seven_dwarfs_9 |>
+  left_join(parks_metadata, by = "park_date")
+```
+
+```{r}
+#| label: tbl-analytic-head
+#| tbl-cap: "First 10 rows of the analytic dataset after joining wait times with park metadata."
+
+seven_dwarfs_9 |>
+  head(10) |>
+  mutate(park_close = as.character(park_close)) |>
+  kbl(digits = 1) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  ) |>
+  scroll_box(width = "100%")
+```
+
+---
+
+## 7.5 Descriptive Table
+
+The table below gives a summary of the three confounders stratified by exposure status. More days fell into the unexposed group (no Extra Magic Mornings). The regular ticket season was the most common. Close times and temperature look roughly similar across groups, though Extra Magic Morning days were slightly more likely to close early (18:00) and slightly cooler overall.
+
+Because `gtsummary` output does not convert cleanly to kable in all contexts, here is an equivalent kable version built manually:
+
+```{r}
+#| label: tbl-descriptive
+#| tbl-cap: "Descriptive summary of confounders by Extra Magic Morning status in the 2018 analytic dataset."
+
+desc <- seven_dwarfs_9 |>
+  mutate(
+    emh = if_else(park_extra_magic_morning == 1, "EMH Morning", "No EMH"),
+    park_close_chr = as.character(park_close)
+  )
+
+ticket_tbl <- desc |>
+  count(emh, park_ticket_season) |>
+  pivot_wider(names_from = emh, values_from = n, values_fill = 0) |>
+  rename(Characteristic = park_ticket_season)
+
+close_tbl <- desc |>
+  count(emh, park_close_chr) |>
+  pivot_wider(names_from = emh, values_from = n, values_fill = 0) |>
+  rename(Characteristic = park_close_chr)
+
+temp_tbl <- desc |>
+  summarize(
+    `EMH Morning`  = round(median(park_temperature_high[emh == "EMH Morning"],  na.rm = TRUE), 1),
+    `No EMH`       = round(median(park_temperature_high[emh == "No EMH"], na.rm = TRUE), 1)
+  ) |>
+  mutate(Characteristic = "Median historic high temp (F)") |>
+  relocate(Characteristic)
+
+bind_rows(
+  tibble(Characteristic = "Ticket season", `EMH Morning` = NA_integer_, `No EMH` = NA_integer_),
+  ticket_tbl,
+  tibble(Characteristic = "Close time", `EMH Morning` = NA_integer_, `No EMH` = NA_integer_),
+  close_tbl,
+  tibble(Characteristic = "Temperature", `EMH Morning` = NA_integer_, `No EMH` = NA_integer_),
+  temp_tbl
+) |>
+  mutate(across(c(`EMH Morning`, `No EMH`), \(x) replace_na(as.character(x), ""))) |>
+  kbl(col.names = c("Characteristic", "EMH Morning (N=60)", "No EMH (N=302)")) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  ) |>
+  row_spec(c(1, 5, 12), bold = TRUE, background = "#f0f0f0")
+```
+
+---
+
+## 7.6 Missing Data
+
+The `vis_miss()` plot shows missingness is mostly concentrated in `wait_minutes_actual_avg`. Posted wait times are missing for about 3% of the year (8 additional days beyond the 3 with no records at all), which is unlikely to meaningfully distort results. Actual wait times are far more incomplete, but since the outcome is posted wait time, that is a separate problem for Chapter 15.
+
+```{r}
+#| label: tbl-missing-summary
+#| tbl-cap: "Share of missing values by variable in the analytic dataset."
+
+seven_dwarfs_9 |>
+  summarize(across(everything(), \(x) mean(is.na(x)))) |>
+  pivot_longer(everything(), names_to = "Variable", values_to = "Proportion Missing") |>
+  filter(`Proportion Missing` > 0) |>
+  arrange(desc(`Proportion Missing`)) |>
+  mutate(`Proportion Missing` = round(`Proportion Missing`, 3)) |>
+  kbl() |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+On January 24th, for example, nine records all showed `NA` for both wait time types in the 9 AM window:
+
+```{r}
+#| label: tbl-missing-example
+#| tbl-cap: "Nine records from January 24, 2018 during the 9 AM hour: all wait times are missing."
+
+seven_dwarfs_train |>
+  filter(park_date == "2018-01-24", hour(wait_datetime) == 9) |>
+  select(starts_with("wait_minutes")) |>
+  kbl(col.names = c("Actual Wait (min)", "Posted Wait (min)")) |>
+  kable_styling(
+    bootstrap_options = c("striped", "condensed"),
+    full_width = FALSE
+  )
+```
+
+---
+
+## 7.7 Checking Causal Assumptions
+
+Data cannot prove the assumptions underlying causal inference, but it can reveal cracks in them worth worrying about.
+
+**Exchangeability** gets its own treatment in Chapter 9 (propensity score evaluation), so we skip it here.
+
+**Consistency** means the exposure must be well-defined. If the question had been about "Extra Magic Hours" in general rather than specifically in the morning, there would be a consistency problem because morning and evening Extra Magic Hours might have different effects. The chapter's choice to specify "morning" sidesteps that issue.
+
+**Positivity** requires that every combination of confounder values contains both exposed and unexposed days. This is where the data can say something concrete.
+
+### Single-variable positivity checks
+
+```{r}
+#| label: fig-close-positivity
+#| fig-cap: "Distribution of park close time by Extra Magic Morning status. Close times of 16:30 and 21:00 had zero exposed days."
+#| fig-alt: "Stacked bar chart showing proportion of EMH vs no-EMH by close time."
+
+seven_dwarfs_9 |>
+  mutate(
+    park_close_chr = as.character(park_close),
+    emh_label = if_else(park_extra_magic_morning == 1, "EMH Morning", "No EMH")
+  ) |>
+  ggplot(aes(
+    x = park_close_chr,
+    fill = emh_label
+  )) +
+  geom_bar(position = "fill", alpha = 0.85) +
+  scale_fill_okabe_ito() +
+  labs(
+    x = "Close time",
+    y = "Proportion of days",
+    fill = "Extra Magic Morning",
+    title = "Park Close Time by Exposure Status"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(panel.grid.major.x = element_blank())
+```
+
+Close times of 16:30 and 21:00 had zero exposed days:
+
+```{r}
+#| label: tbl-close-positivity
+#| tbl-cap: "Day counts by close time and Extra Magic Morning status. Close times 16:30 and 21:00 have no exposed days."
+
+seven_dwarfs_9 |>
+  count(park_close, park_extra_magic_morning) |>
+  complete(park_close, park_extra_magic_morning, fill = list(n = 0)) |>
+  filter(park_close %in% parse_hm(c("16:30", "21:00"))) |>
+  mutate(
+    park_close = as.character(park_close),
+    park_extra_magic_morning = if_else(park_extra_magic_morning == 1, "EMH", "No EMH")
+  ) |>
+  kbl(col.names = c("Close Time", "Exposure", "Days")) |>
+  kable_styling(
+    bootstrap_options = c("striped", "condensed"),
+    full_width = FALSE
+  )
+```
+
+```{r}
+#| label: fig-temp-positivity
+#| fig-cap: "Mirrored histogram of historic high temperature by Extra Magic Morning status. Very few exposed days fall below 60 degrees F."
+#| fig-alt: "Mirrored histogram showing temperature distribution for exposed vs unexposed days."
+
+seven_dwarfs_9 |>
+  mutate(emh_label = if_else(park_extra_magic_morning == 1, "EMH Morning", "No EMH")) |>
+  ggplot(aes(
+    x = park_temperature_high,
+    group = emh_label,
+    fill = emh_label
+  )) +
+  geom_mirror_histogram(bins = 20, alpha = 0.85) +
+  scale_y_continuous(labels = abs) +
+  scale_fill_okabe_ito() +
+  labs(
+    x = "Historic high temperature (F)",
+    y = "Count",
+    fill = "Exposure",
+    title = "Temperature Distribution by Extra Magic Morning Status"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+Only one exposed day has a historic high below 60 degrees:
+
+```{r}
+#| label: tbl-temp-positivity
+#| tbl-cap: "Number of days below 60 F by Extra Magic Morning status. Only one exposed day falls in this range."
+
+seven_dwarfs_9 |>
+  filter(park_temperature_high < 60) |>
+  count(park_extra_magic_morning) |>
+  mutate(
+    park_extra_magic_morning = if_else(park_extra_magic_morning == 1, "EMH Morning", "No EMH")
+  ) |>
+  kbl(col.names = c("Exposure", "Days")) |>
+  kable_styling(
+    bootstrap_options = c("striped", "condensed"),
+    full_width = FALSE
+  )
+```
+
+```{r}
+#| label: fig-ticket-positivity
+#| fig-cap: "Distribution of ticket season by Extra Magic Morning status. All three ticket season types appear in both exposure groups, so no positivity violations are visible here."
+#| fig-alt: "Dodged bar chart showing ticket season counts by exposure status."
+
+seven_dwarfs_9 |>
+  mutate(emh_label = if_else(park_extra_magic_morning == 1, "EMH Morning", "No EMH")) |>
+  ggplot(aes(x = park_ticket_season, fill = emh_label)) +
+  geom_bar(position = "dodge", alpha = 0.85) +
+  scale_fill_okabe_ito() +
+  labs(
+    x = "Ticket season",
+    y = "Days",
+    fill = "Exposure",
+    title = "Ticket Season by Extra Magic Morning Status"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(panel.grid.major.x = element_blank())
+```
+
+Ticket season shows no positivity problems: all three levels appear in both groups.
+
+### Multi-variable positivity check
+
+With only three confounders, we can check all combinations directly. Temperature is cut into tertiles and close time binned into three categories.
+
+```{r}
+#| label: fig-positivity-heatmap
+#| fig-cap: "Proportion of days with Extra Magic Mornings across bins of temperature, close time, and ticket season. White cells are combinations with no exposed days; yellow cells are fully exposed."
+#| fig-alt: "Tile heatmap faceted by ticket season, showing proportion exposed."
+
+prop_exposed <- seven_dwarfs_9 |>
+  mutate(
+    park_temperature_high_bin = cut(park_temperature_high, breaks = 3),
+    park_close_bin = case_when(
+      hour(park_close) < 19 & hour(park_close) > 12 ~ "(1) early",
+      hour(park_close) >= 19 & hour(park_close) < 24 ~ "(2) standard",
+      hour(park_close) >= 24 | hour(park_close) < 12 ~ "(3) late"
+    )
+  ) |>
+  summarize(
+    prop_exposed = mean(park_extra_magic_morning),
+    .by = c(park_close_bin, park_temperature_high_bin, park_ticket_season)
+  ) |>
+  complete(
+    park_close_bin,
+    park_temperature_high_bin,
+    park_ticket_season,
+    fill = list(prop_exposed = 0)
+  )
+
+prop_exposed |>
+  ggplot(aes(
+    x = park_close_bin,
+    y = park_temperature_high_bin,
+    fill = prop_exposed
+  )) +
+  geom_tile(color = "white") +
+  scale_fill_viridis_c(begin = 0.1, end = 0.9, option = "D") +
+  facet_wrap(~park_ticket_season) +
+  labs(
+    x = "Park close time",
+    y = "Historic high temperature (F)",
+    fill = "Proportion\nexposed",
+    title = "Positivity Check Across Three Confounders"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(panel.grid = element_blank())
+```
+
+The fully exposed cell in the peak / early-close / cold-temperature corner corresponds almost certainly to the Christmas and New Year period: cold Florida days during peak holiday season that also close early. That combination appears to have always had Extra Magic Mornings. The chapter notes this as a plausible structural positivity violation rather than a chance one.
+
+```{r}
+#| label: tbl-positivity-extremes
+#| tbl-cap: "Covariate combinations where the proportion exposed is either 0 or 1. These represent potential positivity violations."
+
+prop_exposed |>
+  filter(prop_exposed %in% c(0, 1)) |>
+  arrange(desc(prop_exposed), park_close_bin, park_temperature_high_bin) |>
+  mutate(prop_exposed = if_else(prop_exposed == 1, "1 (always exposed)", "0 (never exposed)")) |>
+  kbl(
+    col.names = c("Close Time", "Temperature Bin", "Ticket Season", "Proportion Exposed")
+  ) |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = FALSE
+  )
+```
+
+Ten covariate combinations are either always exposed or never exposed. Whether these are structural or stochastic violations is a question for domain knowledge, not the data.
+
+---
+
+## Summary
+
+This chapter sets up the analytic dataset that carries through the next several chapters. A few things are worth holding onto:
+
+- Causal data prep ties each wrangling step to a protocol element. `filter()` handles eligibility; `mutate()` handles exposure and outcome definitions; joins handle multi-source data.
+- The "Column Names as Contracts" convention keeps variable provenance legible.
+- Missing data in posted wait times is small (about 3%) and unlikely to drive results. Missing actual wait times are a bigger issue addressed later.
+- Positivity deserves careful attention. Close times of 16:30 and 21:00 have no exposed days; the Christmas period cluster looks like a structural violation for the cold/peak/early-close combination.
+- These observations do not kill the analysis, but they shape how cautiously we should interpret results at the boundary of the covariate space.

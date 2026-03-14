@@ -1,0 +1,2857 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.550">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Causal Inference in R - Chapter Summaries - Overview</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/ch06.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/ch07.html"><span class="chapter-title">Preparing Data to answer Causal questions</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Causal Inference in R - Chapter Summaries</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/malcolmbarrett/causal-inference-in-r" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Causal Inference in R</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch01.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">From casual to causal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch02.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">The Whole Game: Mosquito Nets and Malaria</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch03.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Chapter3: Potential Outcomes and Counterfactuals</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch04.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Shared theme for all ggdag plots</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch05.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Causal Inference is not (just) a statistical problem</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch06.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">From question to answer: Stratification and outcome models</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/ch07.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Preparing Data to answer Causal questions</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link active" data-scroll-target="#the-data">7.1 The Data</a></li>
+  <li><a href="#the-causal-question" id="toc-the-causal-question" class="nav-link" data-scroll-target="#the-causal-question">7.2 The Causal Question</a>
+  <ul class="collapse">
+  <li><a href="#dag" id="toc-dag" class="nav-link" data-scroll-target="#dag">DAG</a></li>
+  </ul></li>
+  <li><a href="#from-protocol-to-code" id="toc-from-protocol-to-code" class="nav-link" data-scroll-target="#from-protocol-to-code">7.3 From Protocol to Code</a>
+  <ul class="collapse">
+  <li><a href="#building-the-outcome-dataset" id="toc-building-the-outcome-dataset" class="nav-link" data-scroll-target="#building-the-outcome-dataset">Building the outcome dataset</a></li>
+  </ul></li>
+  <li><a href="#joining-multiple-data-sources" id="toc-joining-multiple-data-sources" class="nav-link" data-scroll-target="#joining-multiple-data-sources">7.4 Joining Multiple Data Sources</a>
+  <ul class="collapse">
+  <li><a href="#extra-magic-mornings-by-month" id="toc-extra-magic-mornings-by-month" class="nav-link" data-scroll-target="#extra-magic-mornings-by-month">Extra Magic Mornings by month</a></li>
+  <li><a href="#confounders" id="toc-confounders" class="nav-link" data-scroll-target="#confounders">Confounders</a></li>
+  <li><a href="#joining-the-datasets" id="toc-joining-the-datasets" class="nav-link" data-scroll-target="#joining-the-datasets">Joining the datasets</a></li>
+  </ul></li>
+  <li><a href="#descriptive-table" id="toc-descriptive-table" class="nav-link" data-scroll-target="#descriptive-table">7.5 Descriptive Table</a></li>
+  <li><a href="#missing-data" id="toc-missing-data" class="nav-link" data-scroll-target="#missing-data">7.6 Missing Data</a></li>
+  <li><a href="#checking-causal-assumptions" id="toc-checking-causal-assumptions" class="nav-link" data-scroll-target="#checking-causal-assumptions">7.7 Checking Causal Assumptions</a>
+  <ul class="collapse">
+  <li><a href="#single-variable-positivity-checks" id="toc-single-variable-positivity-checks" class="nav-link" data-scroll-target="#single-variable-positivity-checks">Single-variable positivity checks</a></li>
+  <li><a href="#multi-variable-positivity-check" id="toc-multi-variable-positivity-check" class="nav-link" data-scroll-target="#multi-variable-positivity-check">Multi-variable positivity check</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/malcolmbarrett/causal-inference-in-r/blob/main/chapters/ch07.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/malcolmbarrett/causal-inference-in-r/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-title">Overview</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Data preparation for causal inference looks familiar on the surface: you clean things up, do some EDA, maybe merge a couple of datasets. What makes it different is that every decision you take during prep needs to connect back to the causal question and the target trial you are trying to emulate. This chapter walks through that process using wait time data from Disney World.</p>
+<p>The chapter covers six areas: getting to know the data, framing the causal question, linking protocol steps to tidyverse code, joining multiple sources, building a descriptive table, flagging missing data, and checking the positivity assumption.</p>
+<hr>
+<section id="the-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-data">7.1 The Data</h2>
+<p>The <code>touringplans</code> package contains attraction wait time data from Disney and Universal theme parks. There are 14 attractions in the package.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>attractions_metadata <span class="sc">|&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Dataset"</span>, <span class="st">"Name"</span>, <span class="st">"Short Name"</span>, <span class="st">"Park"</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Land"</span>, <span class="st">"Opened"</span>, <span class="st">"Duration (min)"</span>, <span class="st">"Avg Wait / 100"</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">digits =</span> <span class="dv">1</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-attractions" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-attractions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.1: Attractions available in the touringplans package.
+</figcaption>
+<div aria-describedby="tbl-attractions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Dataset</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Name</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Short Name</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Park</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Land</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Opened</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Duration (min)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Avg Wait / 100</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">alien_saucers</td>
+<td style="text-align: left;">Alien Swirling Saucers</td>
+<td style="text-align: left;">Alien Saucers</td>
+<td style="text-align: left;">Disney's Hollywood Studios</td>
+<td style="text-align: left;">Toy Story Land</td>
+<td style="text-align: left;">2018-06-30</td>
+<td style="text-align: right;">2.5</td>
+<td style="text-align: right;">10.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">dinosaur</td>
+<td style="text-align: left;">DINOSAUR</td>
+<td style="text-align: left;">DINOSAUR</td>
+<td style="text-align: left;">Disney's Animal Kingdom</td>
+<td style="text-align: left;">DinoLand U.S.A.</td>
+<td style="text-align: left;">1998-04-22</td>
+<td style="text-align: right;">3.5</td>
+<td style="text-align: right;">3.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">expedition_everest</td>
+<td style="text-align: left;">Expedition Everest - Legend of the Forbidden Mountain</td>
+<td style="text-align: left;">Expedition Everest</td>
+<td style="text-align: left;">Disney's Animal Kingdom</td>
+<td style="text-align: left;">Asia</td>
+<td style="text-align: left;">2006-04-07</td>
+<td style="text-align: right;">4.0</td>
+<td style="text-align: right;">4.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">flight_of_passage</td>
+<td style="text-align: left;">Avatar Flight of Passage</td>
+<td style="text-align: left;">Flight of Passage</td>
+<td style="text-align: left;">Disney's Animal Kingdom</td>
+<td style="text-align: left;">Pandora - The World of Avatar</td>
+<td style="text-align: left;">2017-05-27</td>
+<td style="text-align: right;">6.0</td>
+<td style="text-align: right;">4.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">kilimanjaro_safaris</td>
+<td style="text-align: left;">Kilimanjaro Safaris</td>
+<td style="text-align: left;">Kilimanjaro Safaris</td>
+<td style="text-align: left;">Disney's Animal Kingdom</td>
+<td style="text-align: left;">Africa</td>
+<td style="text-align: left;">1998-04-22</td>
+<td style="text-align: right;">20.0</td>
+<td style="text-align: right;">4.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">navi_river</td>
+<td style="text-align: left;">Na'vi River Journey</td>
+<td style="text-align: left;">Na'vi River</td>
+<td style="text-align: left;">Disney's Animal Kingdom</td>
+<td style="text-align: left;">Pandora - The World of Avatar</td>
+<td style="text-align: left;">2017-05-27</td>
+<td style="text-align: right;">5.0</td>
+<td style="text-align: right;">5.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">pirates_of_caribbean</td>
+<td style="text-align: left;">Pirates of the Caribbean</td>
+<td style="text-align: left;">Pirates of Caribbean</td>
+<td style="text-align: left;">Magic Kingdom</td>
+<td style="text-align: left;">Adventureland</td>
+<td style="text-align: left;">1973-12-17</td>
+<td style="text-align: right;">7.5</td>
+<td style="text-align: right;">1.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">rock_n_rollercoaster</td>
+<td style="text-align: left;">Rock 'n' Roller Coaster Starring Aerosmith</td>
+<td style="text-align: left;">Rock Coaster</td>
+<td style="text-align: left;">Disney's Hollywood Studios</td>
+<td style="text-align: left;">Sunset Boulevard</td>
+<td style="text-align: left;">1999-07-29</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">2.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">seven_dwarfs_train</td>
+<td style="text-align: left;">Seven Dwarfs Mine Train</td>
+<td style="text-align: left;">7 Dwarfs Train</td>
+<td style="text-align: left;">Magic Kingdom</td>
+<td style="text-align: left;">Fantasyland</td>
+<td style="text-align: left;">2014-05-28</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;">5.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">slinky_dog</td>
+<td style="text-align: left;">Slinky Dog Dash</td>
+<td style="text-align: left;">Slinky Dog</td>
+<td style="text-align: left;">Disney's Hollywood Studios</td>
+<td style="text-align: left;">Toy Story Land</td>
+<td style="text-align: left;">2018-06-30</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;">5.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">soarin</td>
+<td style="text-align: left;">Soarin' Around the World</td>
+<td style="text-align: left;">Soarin'</td>
+<td style="text-align: left;">Epcot</td>
+<td style="text-align: left;">World Nature</td>
+<td style="text-align: left;">2005-05-05</td>
+<td style="text-align: right;">8.0</td>
+<td style="text-align: right;">3.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">spaceship_earth</td>
+<td style="text-align: left;">Spaceship Earth</td>
+<td style="text-align: left;">Spaceship Earth</td>
+<td style="text-align: left;">Epcot</td>
+<td style="text-align: left;">World Celebration</td>
+<td style="text-align: left;">1982-10-01</td>
+<td style="text-align: right;">16.0</td>
+<td style="text-align: right;">3.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">splash_mountain</td>
+<td style="text-align: left;">Splash Mountain</td>
+<td style="text-align: left;">Splash Mountain</td>
+<td style="text-align: left;">Magic Kingdom</td>
+<td style="text-align: left;">Frontierland</td>
+<td style="text-align: left;">1992-07-17</td>
+<td style="text-align: right;">18.0</td>
+<td style="text-align: right;">3.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">toy_story_mania</td>
+<td style="text-align: left;">Toy Story Mania!</td>
+<td style="text-align: left;">Toy Story Mania!</td>
+<td style="text-align: left;">Disney's Hollywood Studios</td>
+<td style="text-align: left;">Toy Story Land</td>
+<td style="text-align: left;">2008-05-31</td>
+<td style="text-align: right;">6.5</td>
+<td style="text-align: right;">4.5</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Alongside the attraction data, <code>parks_metadata_raw</code> has 181 columns of daily park-level information: ticket season, historic temperature, special events, and more.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>parks_metadata_raw <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(year, mkemhmorn) <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> mkemhmorn, <span class="at">values_from =</span> n, <span class="at">names_prefix =</span> <span class="st">"emh_"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Year =</span> year, <span class="st">`</span><span class="at">No EMH</span><span class="st">`</span> <span class="ot">=</span> emh_0, <span class="st">`</span><span class="at">EMH Morning</span><span class="st">`</span> <span class="ot">=</span> emh_1) <span class="sc">|&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>() <span class="sc">|&gt;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-emh-by-year" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-emh-by-year-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.2: Days with and without Extra Magic Hours in the morning (mkemhmorn), by year.
+</figcaption>
+<div aria-describedby="tbl-emh-by-year-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">Year</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">No EMH</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">EMH Morning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2015</td>
+<td style="text-align: right;">290</td>
+<td style="text-align: right;">75</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2016</td>
+<td style="text-align: right;">300</td>
+<td style="text-align: right;">66</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2017</td>
+<td style="text-align: right;">293</td>
+<td style="text-align: right;">72</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2018</td>
+<td style="text-align: right;">304</td>
+<td style="text-align: right;">61</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2019</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">115</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">135</td>
+<td style="text-align: right;">14</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">104</td>
+<td style="text-align: right;">NA</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>2020 and 2021 are truncated due to COVID-19 park closures.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>parks_metadata_raw <span class="sc">|&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(year, mkemhmorn) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">days =</span> <span class="fu">sum</span>(n), <span class="at">.by =</span> year) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Year"</span>, <span class="st">"Days Observed"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-days-per-year" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-days-per-year-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.3: Total observation days per year in the parks metadata.
+</figcaption>
+<div aria-describedby="tbl-days-per-year-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">Year</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Days Observed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2015</td>
+<td style="text-align: right;">365</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2016</td>
+<td style="text-align: right;">366</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2017</td>
+<td style="text-align: right;">365</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2018</td>
+<td style="text-align: right;">365</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2019</td>
+<td style="text-align: right;">365</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2020</td>
+<td style="text-align: right;">149</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">104</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The Seven Dwarfs Mine Train data has over 320,000 rows, with one row per wait time record (either posted or actual, with the other as <code>NA</code>).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_train <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">reframe</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(park_date, <span class="fu">starts_with</span>(<span class="st">"wait_minutes"</span>)),</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>      \(.x) <span class="fu">range</span>(.x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">bound =</span> <span class="fu">c</span>(<span class="st">"Min"</span>, <span class="st">"Max"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(bound) <span class="sc">|&gt;</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Bound"</span>, <span class="st">"Park Date"</span>, <span class="st">"Actual Wait (min)"</span>, <span class="st">"Posted Wait (min)"</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-wait-range" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-wait-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.4: Range of dates and wait times in the Seven Dwarfs Mine Train dataset.
+</figcaption>
+<div aria-describedby="tbl-wait-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Bound</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Park Date</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Actual Wait (min)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Posted Wait (min)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Min</td>
+<td style="text-align: left;">2015-01-01</td>
+<td style="text-align: right;">-92918</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Max</td>
+<td style="text-align: left;">2021-12-28</td>
+<td style="text-align: right;">217</td>
+<td style="text-align: right;">300</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The minimum actual wait time of -92,918 minutes is an obvious data error. Strip it before doing anything else.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_train <span class="ot">&lt;-</span> seven_dwarfs_train <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(wait_minutes_actual <span class="sc">&gt;=</span> <span class="dv">0</span> <span class="sc">|</span> <span class="fu">is.na</span>(wait_minutes_actual))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Posted wait times are always multiples of 5, which is a useful sanity check:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_train <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(wait_minutes_posted) <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sort</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">matrix</span>(<span class="at">nrow =</span> <span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">col.names =</span> <span class="cn">NULL</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"condensed"</span>),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-posted-unique" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-posted-unique-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.5: Unique posted wait time values (minutes). All are multiples of 5.
+</figcaption>
+<div aria-describedby="tbl-posted-unique-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-condensed do-not-create-environment cell table-sm table-striped small" data-quarto-postprocess="true">
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">125</td>
+<td style="text-align: right;">150</td>
+<td style="text-align: right;">175</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">225</td>
+<td style="text-align: right;">260</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: right;">130</td>
+<td style="text-align: right;">155</td>
+<td style="text-align: right;">180</td>
+<td style="text-align: right;">205</td>
+<td style="text-align: right;">230</td>
+<td style="text-align: right;">270</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: right;">110</td>
+<td style="text-align: right;">135</td>
+<td style="text-align: right;">160</td>
+<td style="text-align: right;">185</td>
+<td style="text-align: right;">210</td>
+<td style="text-align: right;">235</td>
+<td style="text-align: right;">280</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">140</td>
+<td style="text-align: right;">165</td>
+<td style="text-align: right;">190</td>
+<td style="text-align: right;">215</td>
+<td style="text-align: right;">240</td>
+<td style="text-align: right;">300</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">95</td>
+<td style="text-align: right;">120</td>
+<td style="text-align: right;">145</td>
+<td style="text-align: right;">170</td>
+<td style="text-align: right;">195</td>
+<td style="text-align: right;">220</td>
+<td style="text-align: right;">250</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The two wait time distributions look quite different. Actual times are shorter on average and roughly right-skewed; posted times are discretized to 5-minute increments and slightly heavier in the right tail.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_train <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">starts_with</span>(<span class="st">"wait_minutes"</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"wait_type"</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"wait_minutes"</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">wait_type =</span> <span class="fu">case_when</span>(</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>      wait_type <span class="sc">==</span> <span class="st">"wait_minutes_actual"</span> <span class="sc">~</span> <span class="st">"Actual"</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      wait_type <span class="sc">==</span> <span class="st">"wait_minutes_posted"</span> <span class="sc">~</span> <span class="st">"Posted"</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(wait_minutes, <span class="at">fill =</span> wait_type)) <span class="sc">+</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">color =</span> <span class="cn">NA</span>, <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>wait_type, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_okabe_ito</span>() <span class="sc">+</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Wait time (minutes)"</span>,</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Density"</span>,</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Wait type"</span>,</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Posted vs. Actual Wait Times"</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Seven Dwarfs Mine Train, all years"</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-wait-dist" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Two density plots side by side showing posted and actual wait time distributions.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-wait-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch07_files/figure-html/fig-wait-dist-1.png" class="img-fluid figure-img" alt="Two density plots side by side showing posted and actual wait time distributions." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-wait-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.1: Distribution of posted and actual wait times for the Seven Dwarfs Mine Train. Posted times are rounded to 5-minute increments, while actual times are shorter on average and less discretized.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="the-causal-question" class="level2">
+<h2 class="anchored" data-anchor-id="the-causal-question">7.2 The Causal Question</h2>
+<p>The causal question driving the next several chapters is:</p>
+<blockquote class="blockquote">
+<p><strong>Does having Extra Magic Hours in the morning at Magic Kingdom causally increase the average posted wait time for the Seven Dwarfs Mine Train between 9 AM and 10 AM on the same day in 2018?</strong></p>
+</blockquote>
+<p>The exposure is a binary day-level indicator: did Magic Kingdom run Extra Magic Hours in the morning (yes or no)? The outcome is the average posted wait time during the 9–10 AM window.</p>
+<section id="dag" class="level3">
+<h3 class="anchored" data-anchor-id="dag">DAG</h3>
+<p>The proposed DAG encodes the belief that Extra Magic Morning status and average wait times share three common causes: ticket season, park close time, and historic high temperature. Each of these opens a backdoor path that needs to be blocked.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>coord_dag <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="fu">c</span>(<span class="at">Season =</span> <span class="dv">0</span>, <span class="at">close =</span> <span class="dv">0</span>, <span class="at">weather =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">x =</span> <span class="dv">1</span>, <span class="at">y =</span> <span class="dv">2</span>),</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="fu">c</span>(<span class="at">Season =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">close =</span> <span class="dv">1</span>, <span class="at">weather =</span> <span class="dv">0</span>, <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>labels <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> <span class="st">"Extra Magic</span><span class="sc">\n</span><span class="st">Morning"</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="st">"Average wait"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">Season =</span> <span class="st">"Ticket Season"</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">weather =</span> <span class="st">"Historic high</span><span class="sc">\n</span><span class="st">temperature"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">close =</span> <span class="st">"Time park</span><span class="sc">\n</span><span class="st">closed"</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="fu">dagify</span>(</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  y <span class="sc">~</span> x <span class="sc">+</span> close <span class="sc">+</span> Season <span class="sc">+</span> weather,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">~</span> weather <span class="sc">+</span> close <span class="sc">+</span> Season,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">coords =</span> coord_dag,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">labels =</span> labels,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">exposure =</span> <span class="st">"x"</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">outcome =</span> <span class="st">"y"</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy_dagitty</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">node_status</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(x, y, <span class="at">xend =</span> xend, <span class="at">yend =</span> yend, <span class="at">color =</span> status)) <span class="sc">+</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_edges_arc</span>(<span class="at">curvature =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">5</span>), <span class="fl">0.3</span>)) <span class="sc">+</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_point</span>() <span class="sc">+</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_dag_label_repel</span>(<span class="fu">aes</span>(<span class="at">label =</span> label), <span class="at">seed =</span> <span class="dv">1630</span>) <span class="sc">+</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_okabe_ito</span>(<span class="at">na.value =</span> <span class="st">"grey90"</span>) <span class="sc">+</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_dag</span>() <span class="sc">+</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">clip =</span> <span class="st">"off"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-dag" class="quarto-figure quarto-figure-center quarto-float anchored" alt="DAG with five nodes: Extra Magic Morning, Average wait, Ticket Season, Time park closed, and Historic high temperature.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch07_files/figure-html/fig-dag-1.png" class="img-fluid figure-img" alt="DAG with five nodes: Extra Magic Morning, Average wait, Ticket Season, Time park closed, and Historic high temperature." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dag-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.2: Proposed DAG for the effect of Extra Magic Hours in the morning on average Seven Dwarfs Mine Train wait times between 9 and 10 AM. Ticket season, park close time, and historic high temperature are confounders.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="from-protocol-to-code" class="level2">
+<h2 class="anchored" data-anchor-id="from-protocol-to-code">7.3 From Protocol to Code</h2>
+<p>The target trial protocol maps cleanly onto tidyverse operations. The table below shows that correspondence.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Protocol Element</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Eligibility criteria"</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Exposure definition"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Assignment procedures"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Follow-up period"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Outcome definition"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Analysis plan"</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">tidyverse Function(s)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"`filter()`"</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"`mutate()`"</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"`mutate()`, `select()`"</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"`mutate()`, `pivot_longer()`, `pivot_wider()`"</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"`mutate()`"</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"`select()`, `mutate()`, `*_join()`"</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">escape =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-protocol-code" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-protocol-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.6: Mapping target trial protocol elements to tidyverse functions.
+</figcaption>
+<div aria-describedby="tbl-protocol-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Protocol Element</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">tidyverse Function(s)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Eligibility criteria</td>
+<td style="text-align: left;">`filter()`</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Exposure definition</td>
+<td style="text-align: left;">`mutate()`</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Assignment procedures</td>
+<td style="text-align: left;">`mutate()`, `select()`</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Follow-up period</td>
+<td style="text-align: left;">`mutate()`, `pivot_longer()`, `pivot_wider()`</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Outcome definition</td>
+<td style="text-align: left;">`mutate()`</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Analysis plan</td>
+<td style="text-align: left;">`select()`, `mutate()`, `*_join()`</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The full target trial protocol for this study looks like this:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Protocol Step</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Eligibility criteria"</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Exposure definition"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Assignment procedures"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Follow-up period"</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Outcome definition"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Causal contrast"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Analysis plan"</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Target Trial</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Days from 2018."</span>,</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Exposed: Magic Kingdom had Extra Magic Hours in the morning."</span>,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Random assignment, 50% probability, non-blinded."</span>,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Park open until 10 AM on the same day."</span>,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Average posted wait time for Seven Dwarfs Mine Train, 9--10 AM."</span>,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Average Treatment Effect (ATE)."</span>,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ATE via IPW, weighted for temperature, ticket season, close time."</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Observational Emulation</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Same."</span>,</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Same."</span>,</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Days assigned per observed data. Randomization emulated via confounding adjustment."</span>,</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Same."</span>,</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Same."</span>,</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Same."</span>,</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Same. Confounders from DAG in Figure 1."</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>() <span class="sc">|&gt;</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">TRUE</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">column_spec</span>(<span class="dv">1</span>, <span class="at">bold =</span> <span class="cn">TRUE</span>, <span class="at">width =</span> <span class="st">"12em"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">column_spec</span>(<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">width =</span> <span class="st">"18em"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-target-trial" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-target-trial-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.7: Target trial protocol for the effect of Extra Magic Morning on Seven Dwarfs Mine Train wait times, and the corresponding observational emulation.
+</figcaption>
+<div aria-describedby="tbl-target-trial-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Protocol Step</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Target Trial</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Observational Emulation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Eligibility criteria</td>
+<td style="text-align: left; width: 18em;">Days from 2018.</td>
+<td style="text-align: left; width: 18em;">Same.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 12em; font-weight: bold;">Exposure definition</td>
+<td style="text-align: left; width: 18em;">Exposed: Magic Kingdom had Extra Magic Hours in the morning.</td>
+<td style="text-align: left; width: 18em;">Same.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Assignment procedures</td>
+<td style="text-align: left; width: 18em;">Random assignment, 50% probability, non-blinded.</td>
+<td style="text-align: left; width: 18em;">Days assigned per observed data. Randomization emulated via confounding adjustment.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 12em; font-weight: bold;">Follow-up period</td>
+<td style="text-align: left; width: 18em;">Park open until 10 AM on the same day.</td>
+<td style="text-align: left; width: 18em;">Same.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Outcome definition</td>
+<td style="text-align: left; width: 18em;">Average posted wait time for Seven Dwarfs Mine Train, 9--10 AM.</td>
+<td style="text-align: left; width: 18em;">Same.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 12em; font-weight: bold;">Causal contrast</td>
+<td style="text-align: left; width: 18em;">Average Treatment Effect (ATE).</td>
+<td style="text-align: left; width: 18em;">Same.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 12em; font-weight: bold;">Analysis plan</td>
+<td style="text-align: left; width: 18em;">ATE via IPW, weighted for temperature, ticket season, close time.</td>
+<td style="text-align: left; width: 18em;">Same. Confounders from DAG in Figure 1.</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<section id="building-the-outcome-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="building-the-outcome-dataset">Building the outcome dataset</h3>
+<p>The outcome is the average posted wait time in the 9 AM hour, filtered to 2018.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_9 <span class="ot">&lt;-</span> seven_dwarfs_train <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">year</span>(park_date) <span class="sc">==</span> <span class="dv">2018</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hour =</span> <span class="fu">hour</span>(wait_datetime)) <span class="sc">|&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(wait_minutes_posted, wait_minutes_actual),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>      \(.x) <span class="fu">mean</span>(.x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">.names =</span> <span class="st">"{.col}_avg"</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> <span class="fu">c</span>(park_date, hour)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(wait_minutes_posted_avg, wait_minutes_actual_avg),</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>      \(.x) <span class="fu">if_else</span>(<span class="fu">is.nan</span>(.x), <span class="cn">NA</span>, .x)</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(hour <span class="sc">==</span> <span class="dv">9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Date"</span>, <span class="st">"Hour"</span>, <span class="st">"Avg Posted Wait (min)"</span>, <span class="st">"Avg Actual Wait (min)"</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">digits =</span> <span class="dv">1</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-outcome-head" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-outcome-head-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.8: First 10 rows of the outcome dataset: average posted and actual wait times for the 9 AM hour in 2018.
+</figcaption>
+<div aria-describedby="tbl-outcome-head-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Date</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Hour</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Avg Posted Wait (min)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Avg Actual Wait (min)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">2018-01-01</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">60.0</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-01-02</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">60.0</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2018-01-03</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">60.0</td>
+<td style="text-align: right;">16.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-01-04</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">68.9</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2018-01-05</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">70.6</td>
+<td style="text-align: right;">33.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-01-06</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">33.3</td>
+<td style="text-align: right;">25.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2018-01-07</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">46.4</td>
+<td style="text-align: right;">32.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-01-08</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">69.5</td>
+<td style="text-align: right;">8.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2018-01-09</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">64.3</td>
+<td style="text-align: right;">47.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-01-10</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">74.3</td>
+<td style="text-align: right;">NA</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="joining-multiple-data-sources" class="level2">
+<h2 class="anchored" data-anchor-id="joining-multiple-data-sources">7.4 Joining Multiple Data Sources</h2>
+<p>The exposure and confounders are in <code>parks_metadata_raw</code>. Clean and filter to 2018 first, then join.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>parks_metadata <span class="ot">&lt;-</span> parks_metadata_raw <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_date          =</span> date,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_extra_magic_morning =</span> mkemhmorn,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_ticket_season =</span> wdw_ticket_season,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_temperature_high    =</span> wdwmaxtemp,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_close         =</span> mkclose</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">year</span>(park_date) <span class="sc">==</span> <span class="dv">2018</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Variable names follow the “Column Names as Contracts” convention (Riederer 2020): variables from park-level metadata are prefixed with <code>park_</code>, wait time variables with <code>wait_</code>.</p>
+<section id="extra-magic-mornings-by-month" class="level3">
+<h3 class="anchored" data-anchor-id="extra-magic-mornings-by-month">Extra Magic Mornings by month</h3>
+<p>About 12 to 16% of days had Extra Magic Mornings in most months. December stands out at 42%.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>parks_metadata <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month_num =</span> <span class="fu">month</span>(park_date)) <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">prop_emh =</span> <span class="fu">sum</span>(park_extra_magic_morning) <span class="sc">/</span> <span class="fu">n</span>(),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> month_num</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(month_num) <span class="sc">|&gt;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month_label =</span> <span class="fu">month</span>(month_num, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">abbr =</span> <span class="cn">FALSE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="at">Month =</span> month_label, <span class="st">`</span><span class="at">Proportion EMH</span><span class="st">`</span> <span class="ot">=</span> prop_emh) <span class="sc">|&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">digits =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-emh-by-month" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-emh-by-month-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.9: Proportion of 2018 days with Extra Magic Hours in the morning, by calendar month.
+</figcaption>
+<div aria-describedby="tbl-emh-by-month-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Month</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Proportion EMH</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">January</td>
+<td style="text-align: right;">0.129</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">February</td>
+<td style="text-align: right;">0.143</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">March</td>
+<td style="text-align: right;">0.161</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">April</td>
+<td style="text-align: right;">0.133</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">May</td>
+<td style="text-align: right;">0.129</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">June</td>
+<td style="text-align: right;">0.167</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">July</td>
+<td style="text-align: right;">0.129</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">August</td>
+<td style="text-align: right;">0.161</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">September</td>
+<td style="text-align: right;">0.133</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">October</td>
+<td style="text-align: right;">0.161</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">November</td>
+<td style="text-align: right;">0.133</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">December</td>
+<td style="text-align: right;">0.419</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="confounders" class="level3">
+<h3 class="anchored" data-anchor-id="confounders">Confounders</h3>
+<p>Not every ticket season type appears in every month:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>count_by_month <span class="ot">&lt;-</span> <span class="cf">function</span>(data, .var) {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">month =</span> <span class="fu">month</span>(park_date, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">abbr =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">count</span>(month, {{ .var }}) <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">complete</span>(month, {{ .var }}, <span class="at">fill =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="dv">0</span>))</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>ticket_season_by_month <span class="ot">&lt;-</span> parks_metadata <span class="sc">|&gt;</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count_by_month</span>(park_ticket_season)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ticket_season_by_month <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&lt;=</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(n, park_ticket_season) <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Month"</span>, <span class="st">"Ticket Season"</span>, <span class="st">"Days"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-ticket-season-sparse" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ticket-season-sparse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.10: Months with zero or very few days of a particular ticket season. Peak tickets were absent in August and September; value tickets were absent in June, July, and December.
+</figcaption>
+<div aria-describedby="tbl-ticket-season-sparse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Month</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Ticket Season</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Days</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Aug</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sep</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Jun</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Jul</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dec</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Jan</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">May</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feb</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Jul</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Oct</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: right;">4</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>ticket_season_by_month <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(month, n, <span class="at">fill =</span> park_ticket_season)) <span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"fill"</span>, <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_okabe_ito</span>() <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Proportion of days"</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Ticket season"</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Ticket Season by Month (2018)"</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major.x =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-ticket-season" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Stacked bar chart showing ticket season proportions by month.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ticket-season-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch07_files/figure-html/fig-ticket-season-1.png" class="img-fluid figure-img" alt="Stacked bar chart showing ticket season proportions by month." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ticket-season-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.3: Proportion of days by ticket season across 2018. Regular season dominates the summer months; peak season clusters around school holidays.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Close times show more variety than you might expect:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>parks_metadata <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(park_close, <span class="at">sort =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Close Time"</span>, <span class="st">"Days"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-close-times" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-close-times-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.11: Count of 2018 days by Magic Kingdom park close time.
+</figcaption>
+<div aria-describedby="tbl-close-times-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Close Time</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Days</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">22:00:00</td>
+<td style="text-align: right;">105</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">23:00:00</td>
+<td style="text-align: right;">93</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">24:00:00</td>
+<td style="text-align: right;">58</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">18:00:00</td>
+<td style="text-align: right;">57</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">21:00:00</td>
+<td style="text-align: right;">28</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">20:00:00</td>
+<td style="text-align: right;">21</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">25:00:00</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">16:30:00</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>parks_metadata <span class="sc">|&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count_by_month</span>(park_close) <span class="sc">|&gt;</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(month, n, <span class="at">fill =</span> <span class="fu">ordered</span>(park_close))) <span class="sc">+</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="st">"fill"</span>, <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_okabe_ito</span>() <span class="sc">+</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Proportion of days"</span>,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Close time"</span>,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Park Close Time by Month (2018)"</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major.x =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-close-time" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Stacked bar chart of park close time by month.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-close-time-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch07_files/figure-html/fig-close-time-1.png" class="img-fluid figure-img" alt="Stacked bar chart of park close time by month." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-close-time-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.4: Proportion of days by close time, across months. Earlier close times concentrate in late fall and winter.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>parks_metadata <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month =</span> <span class="fu">month</span>(park_date, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">abbr =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(month, park_temperature_high)) <span class="sc">+</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">height =</span> <span class="dv">0</span>, <span class="at">width =</span> <span class="fl">0.15</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">color =</span> <span class="st">"#0072B2"</span>) <span class="sc">+</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Historic high temperature (F)"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="cn">NULL</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Daily High Temperature by Month (2018)"</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-temperature" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Jitter plot of historic high temperature by month.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temperature-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch07_files/figure-html/fig-temperature-1.png" class="img-fluid figure-img" alt="Jitter plot of historic high temperature by month." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temperature-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.5: Historic high temperature at Walt Disney World by month. The park is in Florida, so temperatures stay relatively warm year-round, but summers get properly hot.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="joining-the-datasets" class="level3">
+<h3 class="anchored" data-anchor-id="joining-the-datasets">Joining the datasets</h3>
+<p>Three May dates are missing from <code>seven_dwarfs_9</code> (no 9 AM records in the raw data):</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>parks_metadata <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(seven_dwarfs_9, <span class="at">by =</span> <span class="st">"park_date"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">park_close =</span> <span class="fu">as.character</span>(park_close)) <span class="sc">|&gt;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>() <span class="sc">|&gt;</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-anti-join" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anti-join-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.12: Days in parks metadata with no matching 9 AM wait time records. Three consecutive days in May 2018 are absent.
+</figcaption>
+<div aria-describedby="tbl-anti-join-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">park_date</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">park_extra_magic_morning</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">park_ticket_season</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">park_temperature_high</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">park_close</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">2018-05-10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">regular</td>
+<td style="text-align: right;">85.97</td>
+<td style="text-align: left;">22:00:00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-05-11</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">regular</td>
+<td style="text-align: right;">91.73</td>
+<td style="text-align: left;">23:00:00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2018-05-12</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: right;">78.56</td>
+<td style="text-align: left;">24:00:00</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Left-join on <code>park_date</code> to build the analytic dataset:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_9 <span class="ot">&lt;-</span> seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(parks_metadata, <span class="at">by =</span> <span class="st">"park_date"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">park_close =</span> <span class="fu">as.character</span>(park_close)) <span class="sc">|&gt;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">digits =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">"100%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-analytic-head" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-analytic-head-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.13: First 10 rows of the analytic dataset after joining wait times with park metadata.
+</figcaption>
+<div aria-describedby="tbl-analytic-head-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; ">
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">park_date</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">hour</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">wait_minutes_posted_avg</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">wait_minutes_actual_avg</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">park_extra_magic_morning</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">park_ticket_season</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">park_temperature_high</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">park_close</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">2018-01-01</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">60.0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: right;">58.6</td>
+<td style="text-align: left;">23:00:00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-01-02</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">60.0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: right;">53.6</td>
+<td style="text-align: left;">24:00:00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2018-01-03</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">60.0</td>
+<td style="text-align: right;">16.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: right;">51.1</td>
+<td style="text-align: left;">24:00:00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-01-04</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">68.9</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">regular</td>
+<td style="text-align: right;">52.7</td>
+<td style="text-align: left;">24:00:00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2018-01-05</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">70.6</td>
+<td style="text-align: right;">33.0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">regular</td>
+<td style="text-align: right;">54.3</td>
+<td style="text-align: left;">24:00:00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-01-06</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">33.3</td>
+<td style="text-align: right;">25.3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">regular</td>
+<td style="text-align: right;">56.2</td>
+<td style="text-align: left;">23:00:00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2018-01-07</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">46.4</td>
+<td style="text-align: right;">32.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">regular</td>
+<td style="text-align: right;">65.2</td>
+<td style="text-align: left;">21:00:00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-01-08</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">69.5</td>
+<td style="text-align: right;">8.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: right;">70.8</td>
+<td style="text-align: left;">20:00:00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2018-01-09</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">64.3</td>
+<td style="text-align: right;">47.0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: right;">75.2</td>
+<td style="text-align: left;">20:00:00</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2018-01-10</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">74.3</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: right;">74.2</td>
+<td style="text-align: left;">20:00:00</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="descriptive-table" class="level2">
+<h2 class="anchored" data-anchor-id="descriptive-table">7.5 Descriptive Table</h2>
+<p>The table below gives a summary of the three confounders stratified by exposure status. More days fell into the unexposed group (no Extra Magic Mornings). The regular ticket season was the most common. Close times and temperature look roughly similar across groups, though Extra Magic Morning days were slightly more likely to close early (18:00) and slightly cooler overall.</p>
+<p>Because <code>gtsummary</code> output does not convert cleanly to kable in all contexts, here is an equivalent kable version built manually:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>desc <span class="ot">&lt;-</span> seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">emh =</span> <span class="fu">if_else</span>(park_extra_magic_morning <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"EMH Morning"</span>, <span class="st">"No EMH"</span>),</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_close_chr =</span> <span class="fu">as.character</span>(park_close)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>ticket_tbl <span class="ot">&lt;-</span> desc <span class="sc">|&gt;</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(emh, park_ticket_season) <span class="sc">|&gt;</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> emh, <span class="at">values_from =</span> n, <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Characteristic =</span> park_ticket_season)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>close_tbl <span class="ot">&lt;-</span> desc <span class="sc">|&gt;</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(emh, park_close_chr) <span class="sc">|&gt;</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> emh, <span class="at">values_from =</span> n, <span class="at">values_fill =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Characteristic =</span> park_close_chr)</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>temp_tbl <span class="ot">&lt;-</span> desc <span class="sc">|&gt;</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">EMH Morning</span><span class="st">`</span>  <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">median</span>(park_temperature_high[emh <span class="sc">==</span> <span class="st">"EMH Morning"</span>],  <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">1</span>),</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">No EMH</span><span class="st">`</span>       <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">median</span>(park_temperature_high[emh <span class="sc">==</span> <span class="st">"No EMH"</span>], <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="dv">1</span>)</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Characteristic =</span> <span class="st">"Median historic high temp (F)"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">relocate</span>(Characteristic)</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a><span class="fu">bind_rows</span>(</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">Characteristic =</span> <span class="st">"Ticket season"</span>, <span class="st">`</span><span class="at">EMH Morning</span><span class="st">`</span> <span class="ot">=</span> <span class="cn">NA_integer_</span>, <span class="st">`</span><span class="at">No EMH</span><span class="st">`</span> <span class="ot">=</span> <span class="cn">NA_integer_</span>),</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>  ticket_tbl,</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">Characteristic =</span> <span class="st">"Close time"</span>, <span class="st">`</span><span class="at">EMH Morning</span><span class="st">`</span> <span class="ot">=</span> <span class="cn">NA_integer_</span>, <span class="st">`</span><span class="at">No EMH</span><span class="st">`</span> <span class="ot">=</span> <span class="cn">NA_integer_</span>),</span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>  close_tbl,</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>(<span class="at">Characteristic =</span> <span class="st">"Temperature"</span>, <span class="st">`</span><span class="at">EMH Morning</span><span class="st">`</span> <span class="ot">=</span> <span class="cn">NA_integer_</span>, <span class="st">`</span><span class="at">No EMH</span><span class="st">`</span> <span class="ot">=</span> <span class="cn">NA_integer_</span>),</span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>  temp_tbl</span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(<span class="st">`</span><span class="at">EMH Morning</span><span class="st">`</span>, <span class="st">`</span><span class="at">No EMH</span><span class="st">`</span>), \(x) <span class="fu">replace_na</span>(<span class="fu">as.character</span>(x), <span class="st">""</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Characteristic"</span>, <span class="st">"EMH Morning (N=60)"</span>, <span class="st">"No EMH (N=302)"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">row_spec</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">12</span>), <span class="at">bold =</span> <span class="cn">TRUE</span>, <span class="at">background =</span> <span class="st">"#f0f0f0"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-descriptive" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-descriptive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.14: Descriptive summary of confounders by Extra Magic Morning status in the 2018 analytic dataset.
+</figcaption>
+<div aria-describedby="tbl-descriptive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Characteristic</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">EMH Morning (N=60)</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">No EMH (N=302)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; background-color: rgba(240, 240, 240, 255) !important;">Ticket season</td>
+<td style="text-align: left; font-weight: bold; background-color: rgba(240, 240, 240, 255) !important;"></td>
+<td style="text-align: left; font-weight: bold; background-color: rgba(240, 240, 240, 255) !important;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">peak</td>
+<td style="text-align: left;">18</td>
+<td style="text-align: left;">63</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">regular</td>
+<td style="text-align: left;">35</td>
+<td style="text-align: left;">161</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">value</td>
+<td style="text-align: left;">7</td>
+<td style="text-align: left;">78</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; font-weight: bold; background-color: rgba(240, 240, 240, 255) !important;">Close time</td>
+<td style="text-align: left; font-weight: bold; background-color: rgba(240, 240, 240, 255) !important;"></td>
+<td style="text-align: left; font-weight: bold; background-color: rgba(240, 240, 240, 255) !important;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">18:00:00</td>
+<td style="text-align: left;">18</td>
+<td style="text-align: left;">39</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">20:00:00</td>
+<td style="text-align: left;">2</td>
+<td style="text-align: left;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">22:00:00</td>
+<td style="text-align: left;">11</td>
+<td style="text-align: left;">93</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">23:00:00</td>
+<td style="text-align: left;">11</td>
+<td style="text-align: left;">81</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">24:00:00</td>
+<td style="text-align: left;">17</td>
+<td style="text-align: left;">40</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">25:00:00</td>
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; font-weight: bold; background-color: rgba(240, 240, 240, 255) !important;">16:30:00</td>
+<td style="text-align: left; font-weight: bold; background-color: rgba(240, 240, 240, 255) !important;">0</td>
+<td style="text-align: left; font-weight: bold; background-color: rgba(240, 240, 240, 255) !important;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">21:00:00</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">28</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Temperature</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Median historic high temp (F)</td>
+<td style="text-align: left;">82.8</td>
+<td style="text-align: left;">84.1</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<hr>
+</section>
+<section id="missing-data" class="level2">
+<h2 class="anchored" data-anchor-id="missing-data">7.6 Missing Data</h2>
+<p>The <code>vis_miss()</code> plot shows missingness is mostly concentrated in <code>wait_minutes_actual_avg</code>. Posted wait times are missing for about 3% of the year (8 additional days beyond the 3 with no records at all), which is unlikely to meaningfully distort results. Actual wait times are far more incomplete, but since the outcome is posted wait time, that is a separate problem for Chapter 15.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), \(x) <span class="fu">mean</span>(<span class="fu">is.na</span>(x)))) <span class="sc">|&gt;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"Variable"</span>, <span class="at">values_to =</span> <span class="st">"Proportion Missing"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">Proportion Missing</span><span class="st">`</span> <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">Proportion Missing</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">Proportion Missing</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="st">`</span><span class="at">Proportion Missing</span><span class="st">`</span>, <span class="dv">3</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>() <span class="sc">|&gt;</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-missing-summary" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-missing-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.15: Share of missing values by variable in the analytic dataset.
+</figcaption>
+<div aria-describedby="tbl-missing-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Variable</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Proportion Missing</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">wait_minutes_actual_avg</td>
+<td style="text-align: right;">0.594</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">wait_minutes_posted_avg</td>
+<td style="text-align: right;">0.022</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>On January 24th, for example, nine records all showed <code>NA</code> for both wait time types in the 9 AM window:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_train <span class="sc">|&gt;</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(park_date <span class="sc">==</span> <span class="st">"2018-01-24"</span>, <span class="fu">hour</span>(wait_datetime) <span class="sc">==</span> <span class="dv">9</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">starts_with</span>(<span class="st">"wait_minutes"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Actual Wait (min)"</span>, <span class="st">"Posted Wait (min)"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-missing-example" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-missing-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.16: Nine records from January 24, 2018 during the 9 AM hour: all wait times are missing.
+</figcaption>
+<div aria-describedby="tbl-missing-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">Actual Wait (min)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Posted Wait (min)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<hr>
+</section>
+<section id="checking-causal-assumptions" class="level2">
+<h2 class="anchored" data-anchor-id="checking-causal-assumptions">7.7 Checking Causal Assumptions</h2>
+<p>Data cannot prove the assumptions underlying causal inference, but it can reveal cracks in them worth worrying about.</p>
+<p><strong>Exchangeability</strong> gets its own treatment in Chapter 9 (propensity score evaluation), so we skip it here.</p>
+<p><strong>Consistency</strong> means the exposure must be well-defined. If the question had been about “Extra Magic Hours” in general rather than specifically in the morning, there would be a consistency problem because morning and evening Extra Magic Hours might have different effects. The chapter’s choice to specify “morning” sidesteps that issue.</p>
+<p><strong>Positivity</strong> requires that every combination of confounder values contains both exposed and unexposed days. This is where the data can say something concrete.</p>
+<section id="single-variable-positivity-checks" class="level3">
+<h3 class="anchored" data-anchor-id="single-variable-positivity-checks">Single-variable positivity checks</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_close_chr =</span> <span class="fu">as.character</span>(park_close),</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">emh_label =</span> <span class="fu">if_else</span>(park_extra_magic_morning <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"EMH Morning"</span>, <span class="st">"No EMH"</span>)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> park_close_chr,</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> emh_label</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">+</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>, <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_okabe_ito</span>() <span class="sc">+</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Close time"</span>,</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Proportion of days"</span>,</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Extra Magic Morning"</span>,</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Park Close Time by Exposure Status"</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major.x =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-close-positivity" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Stacked bar chart showing proportion of EMH vs no-EMH by close time.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-close-positivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch07_files/figure-html/fig-close-positivity-1.png" class="img-fluid figure-img" alt="Stacked bar chart showing proportion of EMH vs no-EMH by close time." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-close-positivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.6: Distribution of park close time by Extra Magic Morning status. Close times of 16:30 and 21:00 had zero exposed days.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Close times of 16:30 and 21:00 had zero exposed days:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(park_close, park_extra_magic_morning) <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">complete</span>(park_close, park_extra_magic_morning, <span class="at">fill =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="dv">0</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(park_close <span class="sc">%in%</span> <span class="fu">parse_hm</span>(<span class="fu">c</span>(<span class="st">"16:30"</span>, <span class="st">"21:00"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_close =</span> <span class="fu">as.character</span>(park_close),</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_extra_magic_morning =</span> <span class="fu">if_else</span>(park_extra_magic_morning <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"EMH"</span>, <span class="st">"No EMH"</span>)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Close Time"</span>, <span class="st">"Exposure"</span>, <span class="st">"Days"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-close-positivity" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-close-positivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.17: Day counts by close time and Extra Magic Morning status. Close times 16:30 and 21:00 have no exposed days.
+</figcaption>
+<div aria-describedby="tbl-close-positivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Close Time</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Exposure</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Days</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">16:30:00</td>
+<td style="text-align: left;">No EMH</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">16:30:00</td>
+<td style="text-align: left;">EMH</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">21:00:00</td>
+<td style="text-align: left;">No EMH</td>
+<td style="text-align: right;">28</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">21:00:00</td>
+<td style="text-align: left;">EMH</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">emh_label =</span> <span class="fu">if_else</span>(park_extra_magic_morning <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"EMH Morning"</span>, <span class="st">"No EMH"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> park_temperature_high,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">group =</span> emh_label,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> emh_label</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">+</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_mirror_histogram</span>(<span class="at">bins =</span> <span class="dv">20</span>, <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> abs) <span class="sc">+</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_okabe_ito</span>() <span class="sc">+</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Historic high temperature (F)"</span>,</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Count"</span>,</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Exposure"</span>,</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Temperature Distribution by Extra Magic Morning Status"</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-temp-positivity" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Mirrored histogram showing temperature distribution for exposed vs unexposed days.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temp-positivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch07_files/figure-html/fig-temp-positivity-1.png" class="img-fluid figure-img" alt="Mirrored histogram showing temperature distribution for exposed vs unexposed days." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temp-positivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.7: Mirrored histogram of historic high temperature by Extra Magic Morning status. Very few exposed days fall below 60 degrees F.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Only one exposed day has a historic high below 60 degrees:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(park_temperature_high <span class="sc">&lt;</span> <span class="dv">60</span>) <span class="sc">|&gt;</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(park_extra_magic_morning) <span class="sc">|&gt;</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_extra_magic_morning =</span> <span class="fu">if_else</span>(park_extra_magic_morning <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"EMH Morning"</span>, <span class="st">"No EMH"</span>)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Exposure"</span>, <span class="st">"Days"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-temp-positivity" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-temp-positivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.18: Number of days below 60 F by Extra Magic Morning status. Only one exposed day falls in this range.
+</figcaption>
+<div aria-describedby="tbl-temp-positivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Exposure</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Days</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">No EMH</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EMH Morning</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">emh_label =</span> <span class="fu">if_else</span>(park_extra_magic_morning <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"EMH Morning"</span>, <span class="st">"No EMH"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> park_ticket_season, <span class="at">fill =</span> emh_label)) <span class="sc">+</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"dodge"</span>, <span class="at">alpha =</span> <span class="fl">0.85</span>) <span class="sc">+</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_okabe_ito</span>() <span class="sc">+</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Ticket season"</span>,</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Days"</span>,</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Exposure"</span>,</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Ticket Season by Extra Magic Morning Status"</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">13</span>) <span class="sc">+</span></span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid.major.x =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-ticket-positivity" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Dodged bar chart showing ticket season counts by exposure status.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ticket-positivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch07_files/figure-html/fig-ticket-positivity-1.png" class="img-fluid figure-img" alt="Dodged bar chart showing ticket season counts by exposure status." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ticket-positivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.8: Distribution of ticket season by Extra Magic Morning status. All three ticket season types appear in both exposure groups, so no positivity violations are visible here.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Ticket season shows no positivity problems: all three levels appear in both groups.</p>
+</section>
+<section id="multi-variable-positivity-check" class="level3">
+<h3 class="anchored" data-anchor-id="multi-variable-positivity-check">Multi-variable positivity check</h3>
+<p>With only three confounders, we can check all combinations directly. Temperature is cut into tertiles and close time binned into three categories.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>prop_exposed <span class="ot">&lt;-</span> seven_dwarfs_9 <span class="sc">|&gt;</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_temperature_high_bin =</span> <span class="fu">cut</span>(park_temperature_high, <span class="at">breaks =</span> <span class="dv">3</span>),</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">park_close_bin =</span> <span class="fu">case_when</span>(</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">hour</span>(park_close) <span class="sc">&lt;</span> <span class="dv">19</span> <span class="sc">&amp;</span> <span class="fu">hour</span>(park_close) <span class="sc">&gt;</span> <span class="dv">12</span> <span class="sc">~</span> <span class="st">"(1) early"</span>,</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">hour</span>(park_close) <span class="sc">&gt;=</span> <span class="dv">19</span> <span class="sc">&amp;</span> <span class="fu">hour</span>(park_close) <span class="sc">&lt;</span> <span class="dv">24</span> <span class="sc">~</span> <span class="st">"(2) standard"</span>,</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">hour</span>(park_close) <span class="sc">&gt;=</span> <span class="dv">24</span> <span class="sc">|</span> <span class="fu">hour</span>(park_close) <span class="sc">&lt;</span> <span class="dv">12</span> <span class="sc">~</span> <span class="st">"(3) late"</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">prop_exposed =</span> <span class="fu">mean</span>(park_extra_magic_morning),</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">.by =</span> <span class="fu">c</span>(park_close_bin, park_temperature_high_bin, park_ticket_season)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">complete</span>(</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    park_close_bin,</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>    park_temperature_high_bin,</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>    park_ticket_season,</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="fu">list</span>(<span class="at">prop_exposed =</span> <span class="dv">0</span>)</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>prop_exposed <span class="sc">|&gt;</span></span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(</span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> park_close_bin,</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> park_temperature_high_bin,</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> prop_exposed</span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">+</span></span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">begin =</span> <span class="fl">0.1</span>, <span class="at">end =</span> <span class="fl">0.9</span>, <span class="at">option =</span> <span class="st">"D"</span>) <span class="sc">+</span></span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>park_ticket_season) <span class="sc">+</span></span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Park close time"</span>,</span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Historic high temperature (F)"</span>,</span>
+<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Proportion</span><span class="sc">\n</span><span class="st">exposed"</span>,</span>
+<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Positivity Check Across Three Confounders"</span></span>
+<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-positivity-heatmap" class="quarto-figure quarto-figure-center quarto-float anchored" alt="Tile heatmap faceted by ticket season, showing proportion exposed.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-positivity-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ch07_files/figure-html/fig-positivity-heatmap-1.png" class="img-fluid figure-img" alt="Tile heatmap faceted by ticket season, showing proportion exposed." width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-positivity-heatmap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.9: Proportion of days with Extra Magic Mornings across bins of temperature, close time, and ticket season. White cells are combinations with no exposed days; yellow cells are fully exposed.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The fully exposed cell in the peak / early-close / cold-temperature corner corresponds almost certainly to the Christmas and New Year period: cold Florida days during peak holiday season that also close early. That combination appears to have always had Extra Magic Mornings. The chapter notes this as a plausible structural positivity violation rather than a chance one.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>prop_exposed <span class="sc">|&gt;</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(prop_exposed <span class="sc">%in%</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(prop_exposed), park_close_bin, park_temperature_high_bin) <span class="sc">|&gt;</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop_exposed =</span> <span class="fu">if_else</span>(prop_exposed <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"1 (always exposed)"</span>, <span class="st">"0 (never exposed)"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Close Time"</span>, <span class="st">"Temperature Bin"</span>, <span class="st">"Ticket Season"</span>, <span class="st">"Proportion Exposed"</span>)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>, <span class="st">"condensed"</span>),</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_width =</span> <span class="cn">FALSE</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div id="tbl-positivity-extremes" class="cell quarto-float anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-positivity-extremes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.19: Covariate combinations where the proportion exposed is either 0 or 1. These represent potential positivity violations.
+</figcaption>
+<div aria-describedby="tbl-positivity-extremes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<div>
+<table class="table table-striped table-hover table-condensed do-not-create-environment cell table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Close Time</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Temperature Bin</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Ticket Season</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Proportion Exposed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(1) early</td>
+<td style="text-align: left;">(51.1,65.2]</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: left;">1 (always exposed)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">(1) early</td>
+<td style="text-align: left;">(51.1,65.2]</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: left;">0 (never exposed)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(1) early</td>
+<td style="text-align: left;">(65.2,79.3]</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: left;">0 (never exposed)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">(1) early</td>
+<td style="text-align: left;">(65.2,79.3]</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: left;">0 (never exposed)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(1) early</td>
+<td style="text-align: left;">(79.3,93.4]</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: left;">0 (never exposed)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">(2) standard</td>
+<td style="text-align: left;">(51.1,65.2]</td>
+<td style="text-align: left;">peak</td>
+<td style="text-align: left;">0 (never exposed)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(2) standard</td>
+<td style="text-align: left;">(51.1,65.2]</td>
+<td style="text-align: left;">regular</td>
+<td style="text-align: left;">0 (never exposed)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">(3) late</td>
+<td style="text-align: left;">(51.1,65.2]</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: left;">0 (never exposed)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">(3) late</td>
+<td style="text-align: left;">(65.2,79.3]</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: left;">0 (never exposed)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">(3) late</td>
+<td style="text-align: left;">(79.3,93.4]</td>
+<td style="text-align: left;">value</td>
+<td style="text-align: left;">0 (never exposed)</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Ten covariate combinations are either always exposed or never exposed. Whether these are structural or stochastic violations is a question for domain knowledge, not the data.</p>
+<hr>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>This chapter sets up the analytic dataset that carries through the next several chapters. A few things are worth holding onto:</p>
+<ul>
+<li>Causal data prep ties each wrangling step to a protocol element. <code>filter()</code> handles eligibility; <code>mutate()</code> handles exposure and outcome definitions; joins handle multi-source data.</li>
+<li>The “Column Names as Contracts” convention keeps variable provenance legible.</li>
+<li>Missing data in posted wait times is small (about 3%) and unlikely to drive results. Missing actual wait times are a bigger issue addressed later.</li>
+<li>Positivity deserves careful attention. Close times of 16:30 and 21:00 have no exposed days; the Christmas period cluster looks like a structural violation for the cold/peak/early-close combination.</li>
+<li>These observations do not kill the analysis, but they shape how cautiously we should interpret results at the boundary of the covariate space.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/ch06.html" class="pagination-link" aria-label="From question to answer: Stratification and outcome models">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">From question to answer: Stratification and outcome models</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/malcolmbarrett/causal-inference-in-r/blob/main/chapters/ch07.qmd" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/malcolmbarrett/causal-inference-in-r/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
