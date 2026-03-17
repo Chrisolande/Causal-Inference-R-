@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Causal Inference in R - Chapter Summaries - Overview</title>
+<title>Causal Inference in R - Chapter Summaries - Preparing Data to answer Causal questions</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -194,7 +194,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#the-data" id="toc-the-data" class="nav-link active" data-scroll-target="#the-data">7.1 The Data</a></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">7.1 The Data</a></li>
   <li><a href="#the-causal-question" id="toc-the-causal-question" class="nav-link" data-scroll-target="#the-causal-question">7.2 The Causal Question</a>
   <ul class="collapse">
   <li><a href="#dag" id="toc-dag" class="nav-link" data-scroll-target="#dag">DAG</a></li>
@@ -225,7 +226,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-title">Overview</span></h1>
+<h1 class="title"><span class="chapter-title">Preparing Data to answer Causal questions</span></h1>
 </div>
 
 
@@ -242,9 +243,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
 <p>Data preparation for causal inference looks familiar on the surface: you clean things up, do some EDA, maybe merge a couple of datasets. What makes it different is that every decision you take during prep needs to connect back to the causal question and the target trial you are trying to emulate. This chapter walks through that process using wait time data from Disney World.</p>
 <p>The chapter covers six areas: getting to know the data, framing the causal question, linking protocol steps to tidyverse code, joining multiple sources, building a descriptive table, flagging missing data, and checking the positivity assumption.</p>
 <hr>
+</section>
 <section id="the-data" class="level2">
 <h2 class="anchored" data-anchor-id="the-data">7.1 The Data</h2>
 <p>The <code>touringplans</code> package contains attraction wait time data from Disney and Universal theme parks. There are 14 attractions in the package.</p>
@@ -800,7 +804,7 @@ Figure&nbsp;8.1: Distribution of posted and actual wait times for the Seven Dwar
 <blockquote class="blockquote">
 <p><strong>Does having Extra Magic Hours in the morning at Magic Kingdom causally increase the average posted wait time for the Seven Dwarfs Mine Train between 9 AM and 10 AM on the same day in 2018?</strong></p>
 </blockquote>
-<p>The exposure is a binary day-level indicator: did Magic Kingdom run Extra Magic Hours in the morning (yes or no)? The outcome is the average posted wait time during the 9–10 AM window.</p>
+<p>The exposure is a binary day-level indicator: did Magic Kingdom run Extra Magic Hours in the morning (yes or no)? The outcome is the average posted wait time during the 9-10 AM window.</p>
 <section id="dag" class="level3">
 <h3 class="anchored" data-anchor-id="dag">DAG</h3>
 <p>The proposed DAG encodes the belief that Extra Magic Morning status and average wait times share three common causes: ticket season, park close time, and historic high temperature. Each of these opens a backdoor path that needs to be blocked.</p>
@@ -954,7 +958,7 @@ Table&nbsp;8.6: Mapping target trial protocol elements to tidyverse functions.
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Exposed: Magic Kingdom had Extra Magic Hours in the morning."</span>,</span>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Random assignment, 50% probability, non-blinded."</span>,</span>
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Park open until 10 AM on the same day."</span>,</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Average posted wait time for Seven Dwarfs Mine Train, 9--10 AM."</span>,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Average posted wait time for Seven Dwarfs Mine Train, 9-10 AM."</span>,</span>
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Average Treatment Effect (ATE)."</span>,</span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ATE via IPW, weighted for temperature, ticket season, close time."</span></span>
 <span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  ),</span>
@@ -1015,7 +1019,7 @@ Table&nbsp;8.7: Target trial protocol for the effect of Extra Magic Morning on S
 </tr>
 <tr class="odd">
 <td style="text-align: left; width: 12em; font-weight: bold;">Outcome definition</td>
-<td style="text-align: left; width: 18em;">Average posted wait time for Seven Dwarfs Mine Train, 9--10 AM.</td>
+<td style="text-align: left; width: 18em;">Average posted wait time for Seven Dwarfs Mine Train, 9-10 AM.</td>
 <td style="text-align: left; width: 18em;">Same.</td>
 </tr>
 <tr class="even">

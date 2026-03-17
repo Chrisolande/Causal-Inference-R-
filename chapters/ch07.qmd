@@ -171,7 +171,7 @@ The causal question driving the next several chapters is:
 
 > **Does having Extra Magic Hours in the morning at Magic Kingdom causally increase the average posted wait time for the Seven Dwarfs Mine Train between 9 AM and 10 AM on the same day in 2018?**
 
-The exposure is a binary day-level indicator: did Magic Kingdom run Extra Magic Hours in the morning (yes or no)? The outcome is the average posted wait time during the 9--10 AM window.
+The exposure is a binary day-level indicator: did Magic Kingdom run Extra Magic Hours in the morning (yes or no)? The outcome is the average posted wait time during the 9-10 AM window.
 
 ### DAG
 
@@ -271,7 +271,7 @@ tibble(
     "Exposed: Magic Kingdom had Extra Magic Hours in the morning.",
     "Random assignment, 50% probability, non-blinded.",
     "Park open until 10 AM on the same day.",
-    "Average posted wait time for Seven Dwarfs Mine Train, 9--10 AM.",
+    "Average posted wait time for Seven Dwarfs Mine Train, 9-10 AM.",
     "Average Treatment Effect (ATE).",
     "ATE via IPW, weighted for temperature, ticket season, close time."
   ),
@@ -826,3 +826,4 @@ This chapter sets up the analytic dataset that carries through the next several 
 - Missing data in posted wait times is small (about 3%) and unlikely to drive results. Missing actual wait times are a bigger issue addressed later.
 - Positivity deserves careful attention. Close times of 16:30 and 21:00 have no exposed days; the Christmas period cluster looks like a structural violation for the cold/peak/early-close combination.
 - These observations do not kill the analysis, but they shape how cautiously we should interpret results at the boundary of the covariate space.
+
